@@ -1,0 +1,39 @@
+
+[env]
+LITECLI_CONFIG = ".litecli.ini"
+SQLITE_DB = ".sqlite-databases/sqlite_workflow.sqlite"
+#______________________________________________________________________________
+
+[tools]
+sqlite = "latest"
+"github:quarylabs/sqruff" = "latest"
+"pipx:litecli" = "latest"
+#______________________________________________________________________________
+
+[tasks.sqlite-connect]
+description = "🪶 Connect to SQLite using litecli"
+quiet = true
+run = """
+mkdir -p .sqlite-databases
+litecli \
+    --liteclirc "$LITECLI_CONFIG" \
+    --database "$SQLITE_DB"
+"""
+
+[tasks.backup]
+description = "💾 Backup all SQLite databases"
+quiet = true
+run = """
+BACKUP_DIR="$HOME/sqlite-backups"
+mkdir -p "$BACKUP_DIR"
+
+for db in .sqlite-databases/*.sqlite; do
+  [ -e "$db" ] || continue
+
+  base=$(basename "$db" .sqlite)
+  ts=$(date -u +"%Y%m%dT%H%M%SZ")
+
+  sqlite3 "$db" ".backup $BACKUP_DIR/${base}_${ts}.sqlite"
+done
+"""
+#______________________________________________________________________________
