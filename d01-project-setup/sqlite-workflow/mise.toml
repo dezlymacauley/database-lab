@@ -1,8 +1,44 @@
 [env]
-LITECLI_CONFIG_FILE = "litecli.ini"
-SQLITE_DB_FILE = ".sqlite-databases/starter_database.sqlite"
+LITECLI_CONFIG_FILE = ".litecli.ini"
+SQLITE_DATABASE_FILE = ".sqlite-databases/starter_database.sqlite"
+SQLITE_BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
+#______________________________________________________________________________
 
 [tools]
 "github:quarylabs/sqruff" = "latest"
 "pipx:litecli" = "latest"
 sqlite = "latest"
+#______________________________________________________________________________
+
+[tasks.sqlite-connect]
+description = "🪶 Connect to the SQLite database | alias = connect"
+quiet = true
+run = """
+mkdir -p .sqlite-databases
+litecli \
+    --liteclirc "$LITECLI_CONFIG" \
+    --database "$SQLITE_DB"
+"""
+#______________________________________________________________________________
+
+[tasks.backup]
+description = "💾 Backup all SQLite databases | alias = backup"
+quiet = true
+run = """
+mkdir -p "$SQLITE_BACKUP_DIRECTORY"
+
+for db in .sqlite-databases/*.sqlite; do
+  [ -e "$db" ] || continue
+
+  base=$(basename "$db" .sqlite)
+  ts=$(date -u +"%Y%m%dT%H%M%SZ")
+
+  sqlite3 "$db" ".backup $SQLITE_BACKUP_DIRECTORY/${base}_${ts}.sqlite"
+done
+"""
+#______________________________________________________________________________
+
+[shell_alias]
+connect = "mise run connect"
+backup = "mise run backup"
+#______________________________________________________________________________

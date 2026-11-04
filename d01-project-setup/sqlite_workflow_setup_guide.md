@@ -24,8 +24,9 @@ _______________________________________________________________________________
 Add this to the `mise.toml` file
 ```toml
 [env]
-LITECLI_CONFIG_FILE = "litecli.ini"
-SQLITE_DB_FILE = ".sqlite-databases/starter_database.sqlite"
+LITECLI_CONFIG_FILE = ".litecli.ini"
+SQLITE_DATABASE_FILE = ".sqlite-databases/starter_database.sqlite"
+BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
 ```
 _______________________________________________________________________________
 
@@ -54,8 +55,9 @@ _______________________________________________________________________________
 Your `mise.toml` file should look like this now:
 ```toml
 [env]
-LITECLI_CONFIG_FILE = "litecli.ini"
-SQLITE_DB_FILE = ".sqlite-databases/starter_database.sqlite"
+LITECLI_CONFIG_FILE = ".litecli.ini"
+SQLITE_DATABASE_FILE = ".sqlite-databases/starter_database.sqlite"
+BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
 
 [tools]
 "github:quarylabs/sqruff" = "latest"
@@ -66,28 +68,9 @@ _______________________________________________________________________________
 
 Create the rest of the workflow structure
 ```bash
-mkdir .sqlite-databases
-sqlite3 :memory: ".save .sqlite-databases/starter_database.sqlite"
-
 touch .gitignore
 touch .litecli.ini
 touch .sqruff.ini
-```
-_______________________________________________________________________________
-
-Run this command to check that the SQLITE database is usable
-```bash
-sqlite3 .sqlite-databases/starter_database.sqlite \
-  "PRAGMA integrity_check;"
-```
-
-You should see an output like this
-```
-╭─────────────────╮
-│ integrity_check │
-╞═════════════════╡
-│ ok              │
-╰─────────────────╯
 ```
 _______________________________________________________________________________
 
@@ -98,60 +81,12 @@ Add this to the `.gitignore` file.
 ```
 _______________________________________________________________________________
 
-Add this to the `.sqruff.ini` file
-```toml
-[sqruff]
-dialect = sqlite
-rules = all
-
-[sqruff:indentation]
-indent_unit = space
-tab_space_size = 4
-indented_joins = True
-```
-_______________________________________________________________________________
-
-
-
-### TODO: Consider removing
-mkdir .mise-tasks
-touch .mise-tasks/sqlite-connect.bash
-chmod u+x .mise-tasks/*bash
-_______________________________________________________________________________
-
-
-Add this to the `.mise-tasks/sqlite-connect.bash` file
-```bash
-
-```
-_______________________________________________________________________________
-
-Use uv to set a specific version of Python for your project:
-```sh
-uv init --bare -p 3.14.6
-```
-
-The `--bare` flag will create a minimal Python project setup that only
-has a `pyproject.toml` file.
-
-The `-p` flag just means Python version,
-and it is followed by a specific version number of Python that you want
-your project to use.
-_______________________________________________________________________________
-_______________________________________________________________________________
-
-_______________________________________________________________________________
-
-Create a `litecli` configuration file
-
-```sh
-touch .litecli.ini
-```
-_______________________________________________________________________________
-
-Add this to the `litecli` configuration file
-
+Add this to the `.litecli.ini` file
 ```ini
+# vim: filetype=dosini
+# This comment above lets Neovim know that this is a `dosini` file
+# so that it can provide syntax highlighting
+
 [main]
 
 # Hides the startup and exit message
@@ -161,7 +96,11 @@ less_chatty = True
 show_bottom_toolbar = False 
 
 # No history file
-# history_file = /dev/null
+history_file = /dev/null"
+
+# Disable logs
+log_level = "NONE"
+log_file = /dev/null
 
 prompt = "\x1b[1;38;5;134m\d\x1b[0m 🪶 \n"
 
@@ -176,41 +115,57 @@ use_local_timezone = False
 # If this is set to False then sql statements can't be split into multiple
 # lines. End of line (return) is considered as the end of the statement.
 multi_line = True
+
+# Destructive warning mode will alert you before executing a sql statement
+# that may cause harm to the database such as "drop table", "drop database"
+# or "shutdown".
+destructive_warning = True
 ```
 _______________________________________________________________________________
 
-Add this to the end your `mise.toml` file
+Add this to the `.sqruff.ini` file
+```ini
+[sqruff]
+dialect = sqlite
+rules = all
 
-```toml
+[sqruff:indentation]
+indent_unit = space
+tab_space_size = 4
+indented_joins = True
+```
+_______________________________________________________________________________
+
+Update the `mise.toml` file to look like this
+```bash
 [env]
-LITECLI_CONFIG = ".litecli.ini"
-SQLITE_DB = ".sqlite-databases/mise_sqlite_dev_workflow.sqlite"
+LITECLI_CONFIG_FILE = ".litecli.ini"
+SQLITE_DATABASE_FILE = ".sqlite-databases/starter_database.sqlite"
+SQLITE_BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
+#______________________________________________________________________________
 
-[tasks.connect]
-description = "🪶 Connect to SQLite using litecli"
+[tools]
+"github:quarylabs/sqruff" = "latest"
+"pipx:litecli" = "latest"
+sqlite = "latest"
+#______________________________________________________________________________
+
+[tasks.sqlite-connect]
+description = "🪶 Connect to the SQLite database | alias = connect"
 quiet = true
 run = """
 mkdir -p .sqlite-databases
 litecli \
---liteclirc "$LITECLI_CONFIG" \
---database "$SQLITE_DB"
+    --liteclirc "$LITECLI_CONFIG" \
+    --database "$SQLITE_DB"
 """
-
-[tasks.setup]
-description = "🚀 Setup the SQLite workflow"
-quiet = true
-run = """
-mkdir -p .sqlite-databases
-rm -rf .venv
-uv sync
-"""
+#______________________________________________________________________________
 
 [tasks.backup]
-description = "💾 Backup all SQLite databases"
+description = "💾 Backup all SQLite databases | alias = backup"
 quiet = true
 run = """
-BACKUP_DIR="$HOME/sqlite-backups"
-mkdir -p "$BACKUP_DIR"
+mkdir -p "$SQLITE_BACKUP_DIRECTORY"
 
 for db in .sqlite-databases/*.sqlite; do
   [ -e "$db" ] || continue
@@ -218,42 +173,35 @@ for db in .sqlite-databases/*.sqlite; do
   base=$(basename "$db" .sqlite)
   ts=$(date -u +"%Y%m%dT%H%M%SZ")
 
-  sqlite3 "$db" ".backup $BACKUP_DIR/${base}_${ts}.sqlite"
+  sqlite3 "$db" ".backup $SQLITE_BACKUP_DIRECTORY/${base}_${ts}.sqlite"
 done
 """
+#______________________________________________________________________________
+
+[shell_alias]
+connect = "mise run connect"
+backup = "mise run backup"
+#______________________________________________________________________________
 ```
 _______________________________________________________________________________
 
-Run this command to view your list of available `mise` tasks,
-you should see this:
+Run this command to view your list of available `mise` tasks
 ```sh
 mise tasks
 ```
-_______________________________________________________________________________
 
-You should you see this
-
+You should see this
 ```
-Name     Description
-backup   💾 Backup all SQLite databases
-clean    🧼 Remove the .venv directory
-connect  🪶 Connect to SQLite using litecli
-setup    🚀 Setup the SQLite workflow
+Name            Description
+backup          💾 Backup all SQLite databases | alias = backup
+sqlite-connect  🪶 Connect to the SQLite database | alias = connect
+database-lab/d01-project-setup/sqlite-workflow on  main [!]
 ```
 _______________________________________________________________________________
 
 If you ever want to setup your workflow after cloning this directory,
-or moving it to a different location, just run these three commands below:
-
+or moving it to a different location, just run the command below:
 ```sh
-mise trust
-mise install
-mise setup
+mise trust && mise install
 ```
-
-This will do the following:
-1. Give mise permission to read and execute the `mise.toml` file
-2. Ensure that all `mise tools` are installed (sqlite and uv)
-3. Ensure tha `litecli` and `sqruff` have been installed with `uv`
-
 _______________________________________________________________________________
