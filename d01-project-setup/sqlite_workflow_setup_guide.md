@@ -86,6 +86,7 @@ Add this to the `.litecli.ini` file
 # vim: filetype=dosini
 # This comment above lets Neovim know that this is a `dosini` file
 # so that it can provide syntax highlighting
+#______________________________________________________________________________
 
 [main]
 
@@ -96,7 +97,7 @@ less_chatty = True
 show_bottom_toolbar = False 
 
 # No history file
-history_file = /dev/null"
+history_file = /dev/null
 
 # Disable logs
 log_level = "NONE"
@@ -137,7 +138,7 @@ indented_joins = True
 _______________________________________________________________________________
 
 Update the `mise.toml` file to look like this
-```bash
+```toml
 [env]
 LITECLI_CONFIG_FILE = ".litecli.ini"
 SQLITE_DATABASE_FILE = ".sqlite-databases/starter_database.sqlite"
@@ -150,14 +151,14 @@ SQLITE_BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
 sqlite = "latest"
 #______________________________________________________________________________
 
-[tasks.sqlite-connect]
+[tasks.connect]
 description = "🪶 Connect to the SQLite database | alias = connect"
 quiet = true
 run = """
 mkdir -p .sqlite-databases
 litecli \
-    --liteclirc "$LITECLI_CONFIG" \
-    --database "$SQLITE_DB"
+    --liteclirc "$LITECLI_CONFIG_FILE" \
+    --database "$SQLITE_DATABASE_FILE"
 """
 #______________________________________________________________________________
 
@@ -192,10 +193,9 @@ mise tasks
 
 You should see this
 ```
-Name            Description
-backup          💾 Backup all SQLite databases | alias = backup
-sqlite-connect  🪶 Connect to the SQLite database | alias = connect
-database-lab/d01-project-setup/sqlite-workflow on  main [!]
+Name     Description
+backup   💾 Backup all SQLite databases | alias = backup
+connect  🪶 Connect to the SQLite database | alias = connect
 ```
 _______________________________________________________________________________
 

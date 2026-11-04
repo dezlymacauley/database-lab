@@ -10,14 +10,14 @@ SQLITE_BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
 sqlite = "latest"
 #______________________________________________________________________________
 
-[tasks.sqlite-connect]
+[tasks.connect]
 description = "🪶 Connect to the SQLite database | alias = connect"
 quiet = true
 run = """
 mkdir -p .sqlite-databases
 litecli \
-    --liteclirc "$LITECLI_CONFIG" \
-    --database "$SQLITE_DB"
+    --liteclirc "$LITECLI_CONFIG_FILE" \
+    --database "$SQLITE_DATABASE_FILE"
 """
 #______________________________________________________________________________
 
