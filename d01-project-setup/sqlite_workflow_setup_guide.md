@@ -9,7 +9,23 @@ _______________________________________________________________________________
 
 Enter the directory
 ```bash
-cd mise-sqlite-workflow 
+cd sqlite-workflow 
+```
+_______________________________________________________________________________
+
+Create a `mise.toml` file and give `mise` permission to automatically
+use it when you enter the directory.
+```bash
+touch mise.toml
+mise trust
+```
+_______________________________________________________________________________
+
+Add this to the `mise.toml` file
+```toml
+[env]
+LITECLI_CONFIG_FILE = "litecli.ini"
+SQLITE_DB_FILE = ".sqlite-databases/starter_database.sqlite"
 ```
 _______________________________________________________________________________
 
@@ -21,46 +37,78 @@ _______________________________________________________________________________
 
 Use `mise` to add the latest version of `litecli` to the project
 ```bash
-mise use pipx:litecli@latest
+mise use "pipx:litecli"@latest
 ```
 
 - The prefix: `pipx` will actually use `uv` to download litecli from PyPI
 _______________________________________________________________________________
 
-Use `mise` to add the latest version of `litecli` to the project
+Use `mise` to add the latest version of `sqruff` to the project
 ```bash
-mise use github:quarylabs/sqruff@latest
+mise use "github:quarylabs/sqruff"@latest
 ```
 - The prefix: `github:` will download the latest binary from the official
 sqruff repository on GitHub 
 _______________________________________________________________________________
 
-You should now have a `mise.toml` file that looks like this:
-
+Your `mise.toml` file should look like this now:
 ```toml
+[env]
+LITECLI_CONFIG_FILE = "litecli.ini"
+SQLITE_DB_FILE = ".sqlite-databases/starter_database.sqlite"
+
 [tools]
-sqlite = "latest"
 "github:quarylabs/sqruff" = "latest"
 "pipx:litecli" = "latest"
+sqlite = "latest"
 ```
 _______________________________________________________________________________
 
-Create the following files and directories
-```bash
-mkdir .mise-tasks
-touch .mise-tasks/sqlite-connect.bash
-chmod u+x .mise-tasks/*bash
+
 
 mkdir .sqlite-databases
 touch .gitignore
 touch .litecli.ini
 touch .sqruff
+
+
+
+You should now have a `mise.toml` file that looks like this:
+```toml
+[tools]
+"github:quarylabs/sqruff" = "latest"
+"pipx:litecli" = "latest"
+sqlite = "latest"
 ```
+_______________________________________________________________________________
+
+Update your `mise.toml` file to look like this
+
+```
+
+```
+
+_______________________________________________________________________________
+
+[tools]
+"github:quarylabs/sqruff" = "latest"
+"pipx:litecli" = "latest"
+sqlite = "latest"
+
+
+Create the following files and directories
+```bash
+```
+
+### TODO: Consider removing
+mkdir .mise-tasks
+touch .mise-tasks/sqlite-connect.bash
+chmod u+x .mise-tasks/*bash
 _______________________________________________________________________________
 
 Add this to the `.gitignore` file. 
 ```gitignore
-# The SQLite database files
+# SQLite Database Files
 .sqlite-databases/
 ```
 _______________________________________________________________________________
