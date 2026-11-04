@@ -64,46 +64,31 @@ sqlite = "latest"
 ```
 _______________________________________________________________________________
 
-
-
+Create the rest of the workflow structure
+```bash
 mkdir .sqlite-databases
+sqlite3 :memory: ".save .sqlite-databases/starter_database.sqlite"
+
 touch .gitignore
 touch .litecli.ini
-touch .sqruff
-
-
-
-You should now have a `mise.toml` file that looks like this:
-```toml
-[tools]
-"github:quarylabs/sqruff" = "latest"
-"pipx:litecli" = "latest"
-sqlite = "latest"
+touch .sqruff.ini
 ```
 _______________________________________________________________________________
 
-Update your `mise.toml` file to look like this
-
-```
-
-```
-
-_______________________________________________________________________________
-
-[tools]
-"github:quarylabs/sqruff" = "latest"
-"pipx:litecli" = "latest"
-sqlite = "latest"
-
-
-Create the following files and directories
+Run this command to check that the SQLITE database is usable
 ```bash
+sqlite3 .sqlite-databases/starter_database.sqlite \
+  "PRAGMA integrity_check;"
 ```
 
-### TODO: Consider removing
-mkdir .mise-tasks
-touch .mise-tasks/sqlite-connect.bash
-chmod u+x .mise-tasks/*bash
+You should see an output like this
+```
+╭─────────────────╮
+│ integrity_check │
+╞═════════════════╡
+│ ok              │
+╰─────────────────╯
+```
 _______________________________________________________________________________
 
 Add this to the `.gitignore` file. 
@@ -112,6 +97,28 @@ Add this to the `.gitignore` file.
 .sqlite-databases/
 ```
 _______________________________________________________________________________
+
+Add this to the `.sqruff.ini` file
+```toml
+[sqruff]
+dialect = sqlite
+rules = all
+
+[sqruff:indentation]
+indent_unit = space
+tab_space_size = 4
+indented_joins = True
+```
+_______________________________________________________________________________
+
+
+
+### TODO: Consider removing
+mkdir .mise-tasks
+touch .mise-tasks/sqlite-connect.bash
+chmod u+x .mise-tasks/*bash
+_______________________________________________________________________________
+
 
 Add this to the `.mise-tasks/sqlite-connect.bash` file
 ```bash
@@ -131,151 +138,8 @@ The `-p` flag just means Python version,
 and it is followed by a specific version number of Python that you want
 your project to use.
 _______________________________________________________________________________
-
-This will create a `pyproject.toml` file that looks like this
-
-```toml
-[project]
-name = "python-project"
-version = "0.1.0"
-requires-python = ">=3.14.6"
-dependencies = []
-```
 _______________________________________________________________________________
 
-Create a .python-version file:
-
-```sh
-touch .python-version
-```
-_______________________________________________________________________________
-
-Add the same Python version number to the file:
-```sh
-echo 3.14.6 > .python-version
-```
-
-This will be used by `uv` to keep track of what version of Python will be
-used in the Python virtual environment.
-_______________________________________________________________________________
-
-Use `uv` to create a Python virtual environment.
-```sh
-uv venv
-```
-
-This will create a `.venv` directory in your project.
-
-When you add dependencies to your project
-This is where `uv` will install those dependencies to the `.venv` directory.
-
-_______________________________________________________________________________
-
-The last step to this:
-
-```sh
-uv sync
-```
-_______________________________________________________________________________
-
-Then exit the project directory
-
-```sh
-cd ..
-```
-_______________________________________________________________________________
-
-And re-enter the project directory
-
-```sh
-cd python-project
-```
-_______________________________________________________________________________
-
-Now run this command to confirm that your project is using the Python from
-your virtual enviroment.
-
-```sh
-which python
-```
-
-If you see this at the end of your path,
-then that means that your project is using the virtual enviroment 
-that was set by uv.
-
-```
-.venv/bin/python
-```
-_______________________________________________________________________________
-
-Use `uv` to add litcli to the workflow
-
-```sh
-uv add --dev litecli
-```
-
-litcli is CLI SQLite client that is written in Python.
-
-This is what you'll use to interact with a SQLite database.
-
-Unlike the default SQLite client, litecli has syntax highlighting,
-tab autocompletion and other quality of life features.
-_______________________________________________________________________________
-
-Use `uv` to add sqruff to the workflow
-
-```sh
-uv add --dev sqruff
-```
-
-sqruff is a Rust-powered formatter and language server for SQL files.
-
-It supports many different SQL dialects.
-_______________________________________________________________________________
-
-You `pyproject.toml` should look like this now
-
-```toml
-[project]
-name = "mise-sqlite-dev-workflow"
-version = "0.1.0"
-requires-python = ">=3.14.6"
-dependencies = []
-
-[dependency-groups]
-dev = [
-    "litecli>=1.17.1",
-    "sqruff>=0.38.0",
-]
-```
-_______________________________________________________________________________
-
-Create a directory for your SQLite databases
-
-```sh
-mkdir .sqlite-databases
-```
-_______________________________________________________________________________
-
-Create a config file for `sqruff`
-
-```sh
-touch .sqruff
-```
-_______________________________________________________________________________
-
-Add this to the `.sqruff` file
-
-```
-[sqruff]
-dialect = sqlite
-rules = all
-
-[sqruff:indentation]
-indent_unit = space
-tab_space_size = 4
-indented_joins = True
-```
 _______________________________________________________________________________
 
 Create a `litecli` configuration file
