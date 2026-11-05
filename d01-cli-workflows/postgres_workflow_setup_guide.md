@@ -78,36 +78,41 @@ Add this to the `.gitignore` file.
 ```
 _______________________________________________________________________________
 
+Add this to the `.env_examples` file
+```env
+# vim: filetype=env
+PGDATA=".postgres"
+PGHOST="127.0.0.1"
+PGPORT="5432"
 
+PGUSER="postgres"
+PGDATABASE="starter_database"
 
-
-
-
-
-
-
-
-
-
-
-
-Add this to the `mise.toml` file
-```toml
-[env]
-LITECLI_CONFIG_FILE = ".litecli.ini"
-SQLITE_DATABASE_FILE = ".sqlite-databases/starter_database.sqlite"
-BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
+POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
 ```
 _______________________________________________________________________________
 
+Add this to the `.env` file to use the starter settings, 
+or use your own custom values
+```env
+# vim: filetype=env
+PGDATA=".postgres"
+PGHOST="127.0.0.1"
+PGPORT="5432"
+
+PGUSER="postgres"
+PGDATABASE="starter_database"
+
+POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
+```
 _______________________________________________________________________________
 
-Add this to the `.litecli.ini` file
+Add this to the `.pgcli.ini` file
 ```ini
 # vim: filetype=dosini
 # This comment above lets Neovim know that this is a `dosini` file
 # so that it can provide syntax highlighting
-#______________________________________________________________________________
+# _____________________________________________________________________________
 
 [main]
 
@@ -124,10 +129,9 @@ history_file = /dev/null
 log_level = "NONE"
 log_file = /dev/null
 
-prompt = "\x1b[1;38;5;134m\d\x1b[0m 🪶 \n"
+prompt = "\x1b[1;38;5;134m\d\x1b[0m 🐘 \n"
 
 # Changes the colour theme.
-# I find this theme more readable since my terminal has a darak background.
 syntax_style = fruity
 
 use_local_timezone = False
@@ -136,13 +140,22 @@ use_local_timezone = False
 # this is set to True, then the end of the statements must have a semi-colon.
 # If this is set to False then sql statements can't be split into multiple
 # lines. End of line (return) is considered as the end of the statement.
-multi_line = True
+multi_line = True 
 
 # Destructive warning mode will alert you before executing a sql statement
 # that may cause harm to the database such as "drop table", "drop database"
 # or "shutdown".
 destructive_warning = True
+# _____________________________________________________________________________
 ```
+_______________________________________________________________________________
+
+
+
+
+
+
+
 _______________________________________________________________________________
 
 Add this to the `.sqruff.ini` file
