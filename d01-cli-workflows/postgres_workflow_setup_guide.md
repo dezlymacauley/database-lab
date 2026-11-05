@@ -88,6 +88,7 @@ PGPORT="5432"
 PGUSER="postgres"
 PGDATABASE="starter_database"
 
+PGCLI_CONFIG_FILE = ".pgcli_config.ini"
 POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
 ```
 _______________________________________________________________________________
@@ -103,6 +104,7 @@ PGPORT="5432"
 PGUSER="postgres"
 PGDATABASE="starter_database"
 
+PGCLI_CONFIG_FILE = ".pgcli_config.ini"
 POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
 ```
 _______________________________________________________________________________
@@ -150,18 +152,10 @@ destructive_warning = True
 ```
 _______________________________________________________________________________
 
-
-
-
-
-
-
-_______________________________________________________________________________
-
 Add this to the `.sqruff.ini` file
 ```ini
 [sqruff]
-dialect = sqlite
+dialect = postgres
 rules = all
 
 [sqruff:indentation]
@@ -170,6 +164,12 @@ tab_space_size = 4
 indented_joins = True
 ```
 _______________________________________________________________________________
+
+
+
+
+
+
 
 Update the `mise.toml` file to look like this
 ```toml
