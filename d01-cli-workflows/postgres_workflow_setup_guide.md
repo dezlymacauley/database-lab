@@ -59,12 +59,45 @@ _______________________________________________________________________________
 
 Create the rest of the workflow structure
 ```bash
+mkdir .mise-tasks
+touch .mise-tasks/pg-status.bash
+chmod +x .mise-tasks/*.bash
+
 touch .env
 touch .env_example
 touch .gitignore
 touch .pgcli.ini
 touch .sqruff.ini
 ```
+_______________________________________________________________________________
+
+Add this to the `.mise-tasks/pg-status.bash` file
+```bash
+#!/usr/bin/env bash
+#MISE description="🚥 View the Postgres server status | alias = pg-status"
+#MISE quiet=true
+
+# Check if the Postgres cluster exists
+printf "\n"
+if [ -f "$PGDATA/PG_VERSION" ]; then
+    printf "✅  A Postgres cluster was found\n"
+else
+    printf "⚫ No Postgres cluster was found\n"
+fi
+
+# Check if the Postgres server is running
+if pg_ctl status > /dev/null 2>&1; then
+    printf "\n✅ The Postgres server is running\n\n"
+else
+    printf "\n⚫ There is no Postgres server currently running\n\n"
+fi
+```
+_______________________________________________________________________________
+
+
+
+
+
 _______________________________________________________________________________
 
 Add this to the `.gitignore` file. 
@@ -165,7 +198,23 @@ indented_joins = True
 ```
 _______________________________________________________________________________
 
+Update the `mise.toml` file to look like this
+```toml
+[env]
+_.file = ".env"
 
+#______________________________________________________________________________
+
+[tools]
+"github:quarylabs/sqruff" = "latest"
+"pipx:pgcli" = "latest"
+postgres = "latest"
+#______________________________________________________________________________
+
+[shell_alias]
+pg-status = "mise run pg-status"
+```
+_______________________________________________________________________________
 
 
 

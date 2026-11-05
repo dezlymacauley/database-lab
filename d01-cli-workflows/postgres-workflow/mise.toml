@@ -8,3 +8,6 @@ _.file = ".env"
 "pipx:pgcli" = "latest"
 postgres = "latest"
 #______________________________________________________________________________
+
+[shell_alias]
+pg-status = "mise run pg-status"
