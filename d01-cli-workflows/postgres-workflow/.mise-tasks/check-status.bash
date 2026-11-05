@@ -2,14 +2,21 @@
 #MISE description="🚥 Check the status of Postgres | alias = check-status"
 #MISE quiet=true
 
+#______________________________________________________________________________
+
+# STEP: 1 => Check that the `PGDATA` variable is set
+
+# This line ensures that the script will exit immediately if any commands
+# fails or if there are any missing variable
 set -euo pipefail
 
-# Ensure the environment variables are set.
+# Checks that the `PGDATA` variable is set
 : "${PGDATA:?Missing environment variable PGDATA}"
 
 #______________________________________________________________________________
 
-# Check if the Postgres cluster exists.
+# STEP: 2 => Check if the Postgres Cluster exists
+
 printf "\n"
 
 if [[ -f "$PGDATA/PG_VERSION" ]]; then
@@ -21,15 +28,15 @@ fi
 
 #______________________________________________________________________________
 
-# Check if the Postgres server is running.
-if [[ -f "$PGDATA/PG_VERSION" ]] && \
-    pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+# STEP: 3 => Check if the Postgres server is running
 
-    printf "\n"
+printf "\n"
+
+if pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
     printf "✅ The Postgres server is running\n"
 else
-    printf "\n"
-    printf "⚫ There is no Postgres server currently running\n"
+    printf "⚫ The Postgres server is not running\n"
 fi
 
 printf "\n"
+#______________________________________________________________________________
