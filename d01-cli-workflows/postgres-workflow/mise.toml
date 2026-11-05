@@ -10,4 +10,5 @@ postgres = "latest"
 #______________________________________________________________________________
 
 [shell_alias]
-pg-status = "mise run pg-status"
+check-status = "mise run check-status"
+setup-cluster = "mise run setup-cluster"

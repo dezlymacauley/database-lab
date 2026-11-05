@@ -60,7 +60,8 @@ _______________________________________________________________________________
 Create the rest of the workflow structure
 ```bash
 mkdir .mise-tasks
-touch .mise-tasks/pg-status.bash
+touch .mise-tasks/check-status.bash
+touch .mise-tasks/setup-cluster.bash
 chmod +x .mise-tasks/*.bash
 
 touch .env
@@ -71,10 +72,10 @@ touch .sqruff.ini
 ```
 _______________________________________________________________________________
 
-Add this to the `.mise-tasks/pg-status.bash` file
+Add this to the `.mise-tasks/check-status.bash` file
 ```bash
 #!/usr/bin/env bash
-#MISE description="🚥 View the Postgres server status | alias = pg-status"
+#MISE description="🚥 Check the status of Postgres | alias = check-status"
 #MISE quiet=true
 
 # Check if the Postgres cluster exists
@@ -94,10 +95,10 @@ fi
 ```
 _______________________________________________________________________________
 
+Add this to the `.mise-tasks/setup-cluster.bash` file
+```bash
 
-
-
-
+```
 _______________________________________________________________________________
 
 Add this to the `.gitignore` file. 
@@ -212,7 +213,8 @@ postgres = "latest"
 #______________________________________________________________________________
 
 [shell_alias]
-pg-status = "mise run pg-status"
+server-status = "mise run server-status"
+setup-cluster = "mise run setup-cluster"
 ```
 _______________________________________________________________________________
 
@@ -220,18 +222,6 @@ _______________________________________________________________________________
 
 
 
-Update the `mise.toml` file to look like this
-```toml
-[env]
-LITECLI_CONFIG_FILE = ".litecli.ini"
-SQLITE_DATABASE_FILE = ".sqlite-databases/starter_database.sqlite"
-SQLITE_BACKUP_DIRECTORY = "$HOME/local-workspace/sqlite-database-backups"
-#______________________________________________________________________________
-
-[tools]
-"github:quarylabs/sqruff" = "latest"
-"pipx:litecli" = "latest"
-sqlite = "latest"
 #______________________________________________________________________________
 
 [tasks.connect]
