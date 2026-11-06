@@ -234,7 +234,6 @@ exec psql \
     --dbname=postgres \
     --no-psqlrc
 #______________________________________________________________________________
-
 ```
 _______________________________________________________________________________
 
@@ -443,22 +442,35 @@ Add this to the `.env_example` file
 # Helps Neovim provide the correct syntax highlighting for this file
 #______________________________________________________________________________
 
-# Used by tasks: `check-status`, and `setup-cluster`
+# Used by the tasks: 
+# `check-status`, `setup-cluster`, `connect-admin`
 PGDATA=".postgres"
 #______________________________________________________________________________
 
-# Used by task: `setup-cluster`
-PGUSER="postgres"
+# Used by the tasks: 
+# `setup-cluster`, `connect-admin`
 PGPASSWORD="postgres"
 #______________________________________________________________________________
 
+# Used by the tasks: 
+# `setup-cluster`, `connect-admin`
 PGHOST="127.0.0.1"
+#______________________________________________________________________________
+
+# Used by the tasks: 
+# `connect-admin`
 PGPORT="5432"
+#______________________________________________________________________________
 
-PGDATABASE="starter_database"
-
-PGCLI_CONFIG_FILE=".pgcli_config.ini"
+# Used by the tasks:
+# `backup-cluster`
 POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
+#______________________________________________________________________________
+
+PGUSER="postgres"
+PGDATABASE="postgres"
+PGCLI_CONFIG_FILE=".pgcli.ini"
+#______________________________________________________________________________
 ```
 _______________________________________________________________________________
 
@@ -469,22 +481,70 @@ or use your own custom values
 # Helps Neovim provide the correct syntax highlighting for this file
 #______________________________________________________________________________
 
-# Used by tasks: `check-status`, and `setup-cluster`
+# Used by the tasks: 
+# `check-status`, `setup-cluster`, `connect-admin`
 PGDATA=".postgres"
 #______________________________________________________________________________
 
-# Used by task: `setup-cluster`
-PGUSER="postgres"
+# Used by the tasks: 
+# `setup-cluster`, `connect-admin`
 PGPASSWORD="postgres"
 #______________________________________________________________________________
 
+# Used by the tasks: 
+# `setup-cluster`, `connect-admin`
 PGHOST="127.0.0.1"
+#______________________________________________________________________________
+
+# Used by the tasks: 
+# `connect-admin`
 PGPORT="5432"
+#______________________________________________________________________________
 
-PGDATABASE="starter_database"
-
-PGCLI_CONFIG_FILE=".pgcli_config.ini"
+# Used by the tasks:
+# `backup-cluster`
 POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
+#______________________________________________________________________________
+
+PGUSER="postgres"
+PGDATABASE="postgres"
+PGCLI_CONFIG_FILE=".pgcli.ini"
+
+
+
+# vim: filetype=env
+# Helps Neovim provide the correct syntax highlighting for this file
+#______________________________________________________________________________
+
+# Used by the tasks: 
+# `check-status`, `setup-cluster`, `connect-admin`
+PGDATA=".postgres"
+#______________________________________________________________________________
+
+# Used by the tasks: 
+# `setup-cluster`, `connect-admin`
+PGPASSWORD="postgres"
+#______________________________________________________________________________
+
+# Used by the tasks: 
+# `setup-cluster`, `connect-admin`
+PGHOST="127.0.0.1"
+#______________________________________________________________________________
+
+# Used by the tasks: 
+# `connect-admin`
+PGPORT="5432"
+#______________________________________________________________________________
+
+# Used by the tasks:
+# `backup-cluster`
+POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
+#______________________________________________________________________________
+
+PGUSER="postgres"
+PGDATABASE="postgres"
+PGCLI_CONFIG_FILE=".pgcli.ini"
+#______________________________________________________________________________
 ```
 _______________________________________________________________________________
 
@@ -553,7 +613,7 @@ LOCAL_CLUSTER_MODE = true
 
 [tools]
 "github:quarylabs/sqruff" = "latest"
-"pipx:pgcli" = "latest"
+"pipx:pgcli" = { version = "latest", uvx_args = "--with psycopg[binary]" }
 postgres = "latest"
 #______________________________________________________________________________
 
@@ -561,6 +621,7 @@ postgres = "latest"
 backup-cluster = "mise run backup-cluster"
 check-status = "mise run check-status"
 connect-admin = "mise run connect-admin"
+connect-query = "mise run connect-query"
 menu = "mise tasks; echo; mise shell-alias ls"
 setup-cluster = "mise run setup-cluster"
 toggle-server = "mise run toggle-server"
