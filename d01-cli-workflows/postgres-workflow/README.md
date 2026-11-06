@@ -14,22 +14,6 @@ _______________________________________________________________________________
 
 ## Usage
 
-Run this command to view your list of available `mise` tasks
-```bash
-mise tasks
-```
-
-You should see this
-```
-Name           Description
-check-status   🚥 Check the status of Postgres | alias = check-status
-setup-cluster  🐘 Setup the Postgres Cluster | alias = setup-cluster
-```
-
-You can run a command by using the syntax:
-`mise run name-of-command` or just the alias `name-of-command`
-_______________________________________________________________________________
-
 Run this command to view a list of available commands:
 ```bash
 menu

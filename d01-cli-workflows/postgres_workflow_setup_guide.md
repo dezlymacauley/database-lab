@@ -436,82 +436,8 @@ Add this to the `.gitignore` file.
 ```
 _______________________________________________________________________________
 
-Add this to the `.env_example` file
+Add this to the `.env_example` and the `.env` file
 ```env
-# vim: filetype=env
-# Helps Neovim provide the correct syntax highlighting for this file
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `check-status`, `setup-cluster`, `connect-admin`
-PGDATA=".postgres"
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `setup-cluster`, `connect-admin`
-PGPASSWORD="postgres"
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `setup-cluster`, `connect-admin`
-PGHOST="127.0.0.1"
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `connect-admin`
-PGPORT="5432"
-#______________________________________________________________________________
-
-# Used by the tasks:
-# `backup-cluster`
-POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
-#______________________________________________________________________________
-
-PGUSER="postgres"
-PGDATABASE="postgres"
-PGCLI_CONFIG_FILE=".pgcli.ini"
-#______________________________________________________________________________
-```
-_______________________________________________________________________________
-
-Add this to the `.env` file to use the starter settings, 
-or use your own custom values
-```env
-# vim: filetype=env
-# Helps Neovim provide the correct syntax highlighting for this file
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `check-status`, `setup-cluster`, `connect-admin`
-PGDATA=".postgres"
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `setup-cluster`, `connect-admin`
-PGPASSWORD="postgres"
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `setup-cluster`, `connect-admin`
-PGHOST="127.0.0.1"
-#______________________________________________________________________________
-
-# Used by the tasks: 
-# `connect-admin`
-PGPORT="5432"
-#______________________________________________________________________________
-
-# Used by the tasks:
-# `backup-cluster`
-POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
-#______________________________________________________________________________
-
-PGUSER="postgres"
-PGDATABASE="postgres"
-PGCLI_CONFIG_FILE=".pgcli.ini"
-
-
-
 # vim: filetype=env
 # Helps Neovim provide the correct syntax highlighting for this file
 #______________________________________________________________________________
@@ -646,22 +572,6 @@ mise install
 _______________________________________________________________________________
 
 ## Usage
-
-Run this command to view your list of available `mise` tasks
-```bash
-mise tasks
-```
-
-You should see this
-```
-Name           Description
-check-status   🚥 Check the status of Postgres | alias = check-status
-setup-cluster  🐘 Setup the Postgres Cluster | alias = setup-cluster
-```
-
-You can run a command by using the syntax:
-`mise run name-of-command` or just the alias `name-of-command`
-_______________________________________________________________________________
 
 Run this command to view a list of available commands:
 ```bash
