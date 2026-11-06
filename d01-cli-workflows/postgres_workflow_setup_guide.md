@@ -20,7 +20,7 @@ Add this to the `mise.toml` file
 ```toml
 [env]
 _.file = ".env"   
-LOCAL_MODE = true
+LOCAL_CLUSTER_MODE = true
 ```
 _______________________________________________________________________________
 
@@ -32,7 +32,7 @@ _______________________________________________________________________________
 
 Use `mise` to add the latest version of `pgcli` to the project
 ```bash
-mise use "pipx:pgcli"@latest
+mise use "pipx:pgcli[uvx_args=--with psycopg[binary]]"@latest
 ```
 
 - The prefix: `pipx` will actually use `uv` to download litecli from PyPI
@@ -50,11 +50,11 @@ Your `mise.toml` file should look like this now:
 ```toml
 [env]
 _.file = ".env"   
-LOCAL_MODE = true
+LOCAL_CLUSTER_MODE = true
 
 [tools]
 "github:quarylabs/sqruff" = "latest"
-"pipx:pgcli" = "latest"
+"pipx:pgcli" = { version = "latest", uvx_args = "--with psycopg[binary]" }
 postgres = "latest"
 ```
 _______________________________________________________________________________
@@ -64,7 +64,11 @@ Create the rest of the workflow structure
 mkdir .mise-tasks
 touch .mise-tasks/backup-cluster.bash
 touch .mise-tasks/check-status.bash
+touch .mise-tasks/connect-admin.bash
+touch .mise-tasks/connect-query.bash
 touch .mise-tasks/setup-cluster.bash
+touch .mise-tasks/toggle-server.bash
+
 chmod +x .mise-tasks/*.bash
 
 touch .env
@@ -234,6 +238,51 @@ exec psql \
 ```
 _______________________________________________________________________________
 
+Add this to the `.mise-tasks/connect-query` file
+```bash
+#!/usr/bin/env bash
+#MISE description="📜 Connect to Postgres for querying with pgcli | alias = connect-query"
+#MISE quiet=true
+#______________________________________________________________________________
+
+# STEP: 1 => Ensure that a valid Postgres cluster exists and is running
+
+set -euo pipefail
+
+: "${PGDATA:?Missing environment variable PGDATA}"
+: "${PGHOST:?Missing environment variable PGHOST}"
+: "${PGPORT:?Missing environment variable PGPORT}"
+: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${PGCLI_CONFIG_FILE:?Missing environment variable PGCLI_CONFIG_FILE}"
+
+if [[ ! -f "$PGDATA/PG_VERSION" ]]; then
+    printf "❌ No valid Postgres cluster was found.\n" >&2
+    exit 1
+fi
+
+if ! pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+    printf "❌ The Postgres server is not running.\n" >&2
+    exit 1
+fi
+
+printf "✅ Postgres cluster found and server is running.\n"
+#______________________________________________________________________________
+
+# STEP: 2 => Connect to the Postgres database as the postgres superuser
+
+printf "\n"
+printf "⏳ Connecting to Postgres...\n"
+
+exec pgcli \
+    --pgclirc "$PGCLI_CONFIG_FILE" \
+    --host "$PGHOST" \
+    --port "$PGPORT" \
+    --username=postgres \
+    --dbname=postgres
+#______________________________________________________________________________
+```
+_______________________________________________________________________________
+
 Add this to the `.mise-tasks/setup-cluster.bash` file
 ```bash
 #!/usr/bin/env bash
@@ -325,6 +374,54 @@ printf "⏳ Starting the Postgres server...\n"
 pg_ctl -D "$PGDATA" -l "$PGDATA/server.log" start -w > /dev/null
 
 printf "✅ Postgres server started successfully.\n"
+#______________________________________________________________________________
+```
+_______________________________________________________________________________
+
+Add this to the `.mise-tasks/toggle-server.bash` file
+```bash
+#!/usr/bin/env bash
+#MISE description="🐘 Toggle the Postgres Server | alias = toggle-server"
+#MISE quiet=true
+#______________________________________________________________________________
+
+# STEP: 1 => Ensure that a valid Postgres cluster exists
+
+set -euo pipefail
+
+: "${PGDATA:?Missing environment variable PGDATA}"
+
+if [[ ! -f "$PGDATA/PG_VERSION" ]]; then
+    printf "❌ No valid Postgres cluster was found.\n" >&2
+    exit 1
+fi
+#______________________________________________________________________________
+
+# STEP: 2 => Check the Postgres server status
+
+if pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+
+    printf "\n"
+    printf "⏳ Stopping the Postgres server...\n"
+
+    # `-m fast` terminates existing connections
+    # and rolls back active transactions.
+    #
+    # `-w` waits until the server has completely stopped.
+    pg_ctl -D "$PGDATA" stop -m fast -w > /dev/null
+
+    printf "✅ Postgres server stopped.\n"
+
+else
+
+    printf "\n"
+    printf "⏳ Starting the Postgres server...\n"
+
+    pg_ctl -D "$PGDATA" -l "$PGDATA/server.log" start -w > /dev/null
+
+    printf "✅ Postgres server started successfully.\n"
+
+fi
 #______________________________________________________________________________
 ```
 _______________________________________________________________________________
@@ -451,7 +548,7 @@ Update the `mise.toml` file to look like this
 ```toml
 [env]
 _.file=".env"
-LOCAL_MODE = true
+LOCAL_CLUSTER_MODE = true
 #______________________________________________________________________________
 
 [tools]
@@ -461,9 +558,12 @@ postgres = "latest"
 #______________________________________________________________________________
 
 [shell_alias]
+backup-cluster = "mise run backup-cluster"
 check-status = "mise run check-status"
+connect-admin = "mise run connect-admin"
 menu = "mise tasks; echo; mise shell-alias ls"
 setup-cluster = "mise run setup-cluster"
+toggle-server = "mise run toggle-server"
 #______________________________________________________________________________
 ```
 _______________________________________________________________________________
@@ -502,57 +602,26 @@ You can run a command by using the syntax:
 `mise run name-of-command` or just the alias `name-of-command`
 _______________________________________________________________________________
 
-Run this command to view list of shell-aliases:
+Run this command to view a list of available commands:
 ```bash
-mise shell-alias ls
+menu
 ```
 
 You should see this
 ```
-alias         command
-check-status  mise run check-status
-setup-cluster mise run setup-cluster
+Name            Description
+backup-cluster  📸 Backup the Postgres Cluster | alias = backup-cluster
+check-status    🚥 Check the status of Postgres | alias = check-status
+connect-admin   📜 Connect as admin user with pqsl | alias = connect-admin
+setup-cluster   🏡 Setup the Postgres Cluster | alias = setup-cluster
+toggle-server   🐘 Toggle the Postgres Server | alias = toggle-server
+
+alias          command
+backup-cluster mise run backup-cluster
+check-status   mise run check-status
+connect-admin  mise run connect-admin
+menu           mise tasks; echo; mise shell-alias ls
+setup-cluster  mise run setup-cluster
+toggle-server  mise run toggle-server
 ```
 _______________________________________________________________________________
-
-
-
-## TODO
-
-
-
-#______________________________________________________________________________
-
-[tasks.connect]
-description = "🪶 Connect to the SQLite database | alias = connect"
-quiet = true
-run = """
-mkdir -p .sqlite-databases
-litecli \
-    --liteclirc "$LITECLI_CONFIG_FILE" \
-    --database "$SQLITE_DATABASE_FILE"
-"""
-#______________________________________________________________________________
-
-[tasks.backup]
-description = "💾 Backup all SQLite databases | alias = backup"
-quiet = true
-run = """
-mkdir -p "$SQLITE_BACKUP_DIRECTORY"
-
-for db in .sqlite-databases/*.sqlite; do
-  [ -e "$db" ] || continue
-
-  base=$(basename "$db" .sqlite)
-  ts=$(date -u +"%Y%m%dT%H%M%SZ")
-
-  sqlite3 "$db" ".backup $SQLITE_BACKUP_DIRECTORY/${base}_${ts}.sqlite"
-done
-"""
-#______________________________________________________________________________
-
-[shell_alias]
-connect = "mise run connect"
-backup = "mise run backup"
-#______________________________________________________________________________
-

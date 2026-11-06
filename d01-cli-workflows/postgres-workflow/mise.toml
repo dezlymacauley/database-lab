@@ -1,11 +1,11 @@
 [env]
 _.file=".env"
-LOCAL_MODE = true
+LOCAL_CLUSTER_MODE = true
 #______________________________________________________________________________
 
 [tools]
 "github:quarylabs/sqruff" = "latest"
-"pipx:pgcli" = "latest"
+"pipx:pgcli" = { version = "latest", uvx_args = "--with psycopg[binary]" }
 postgres = "latest"
 #______________________________________________________________________________
 
@@ -13,6 +13,7 @@ postgres = "latest"
 backup-cluster = "mise run backup-cluster"
 check-status = "mise run check-status"
 connect-admin = "mise run connect-admin"
+connect-query = "mise run connect-query"
 menu = "mise tasks; echo; mise shell-alias ls"
 setup-cluster = "mise run setup-cluster"
 toggle-server = "mise run toggle-server"

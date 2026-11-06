@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#MISE description="📜 Connect to Postgres for querying with pgcli | alias = connect-query"
+#MISE quiet=true
+#______________________________________________________________________________
+
+# STEP: 1 => Ensure that a valid Postgres cluster exists and is running
+
+set -euo pipefail
+
+: "${PGDATA:?Missing environment variable PGDATA}"
+: "${PGHOST:?Missing environment variable PGHOST}"
+: "${PGPORT:?Missing environment variable PGPORT}"
+: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${PGCLI_CONFIG_FILE:?Missing environment variable PGCLI_CONFIG_FILE}"
+
+if [[ ! -f "$PGDATA/PG_VERSION" ]]; then
+    printf "❌ No valid Postgres cluster was found.\n" >&2
+    exit 1
+fi
+
+if ! pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+    printf "❌ The Postgres server is not running.\n" >&2
+    exit 1
+fi
+
+printf "✅ Postgres cluster found and server is running.\n"
+#______________________________________________________________________________
+
+# STEP: 2 => Connect to the Postgres database as the postgres superuser
+
+printf "\n"
+printf "⏳ Connecting to Postgres...\n"
+
+exec pgcli \
+    --pgclirc "$PGCLI_CONFIG_FILE" \
+    --host "$PGHOST" \
+    --port "$PGPORT" \
+    --username=postgres \
+    --dbname=postgres
+#______________________________________________________________________________
