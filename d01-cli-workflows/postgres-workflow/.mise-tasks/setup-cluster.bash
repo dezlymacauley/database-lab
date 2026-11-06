@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="🐘 Setup the Postgres Cluster | alias = setup-cluster"
 #MISE quiet=true
-
 #______________________________________________________________________________
 
 # STEP: 1 => Ensure that the relevant environment variables are set
@@ -9,7 +8,6 @@
 set -euo pipefail
 
 : "${PGDATA:?Missing environment variable PGDATA}"
-: "${PGUSER:?Missing environment variable PGUSER}"
 : "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
 #______________________________________________________________________________
 
@@ -31,7 +29,7 @@ if [[ -e "$PGDATA" ]]; then
             if pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
                 printf "⏳ Stopping the Postgres server...\n"
 
-                # `-m fast` terminates existing connections 
+                # `-m fast` terminates existing connections
                 # and rolls back active transactions.
                 #
                 # `-w` waits until the server has completely stopped.
@@ -67,7 +65,7 @@ printf '%s\n' "$PGPASSWORD" > "$password_file"
 
 if ! initdb \
     -D "$PGDATA" \
-    -U "$PGUSER" \
+    -U postgres \
     --auth=scram-sha-256 \
     --pwfile="$password_file" > /dev/null; then
 

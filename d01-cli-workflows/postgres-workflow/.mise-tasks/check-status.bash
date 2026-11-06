@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="🚥 Check the status of Postgres | alias = check-status"
 #MISE quiet=true
-
 #______________________________________________________________________________
 
 # STEP: 1 => Ensure that the relevant environment variables are set
@@ -27,7 +26,6 @@ fi
 
 printf "✅ A Postgres cluster was found at:\n"
 printf "%s\n" "$PGDATA"
-
 #______________________________________________________________________________
 
 # STEP: 3 => Check if the Postgres server is running

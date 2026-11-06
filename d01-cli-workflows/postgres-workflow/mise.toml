@@ -10,6 +10,7 @@ postgres = "latest"
 #______________________________________________________________________________
 
 [shell_alias]
+connect-admin = "mise run connect-admin"
 check-status = "mise run check-status"
 menu = "mise tasks; echo; mise shell-alias ls"
 setup-cluster = "mise run setup-cluster"
