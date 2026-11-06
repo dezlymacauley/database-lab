@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="🐘 Connect to Postgres for administrative tasks | alias = connect-admin"
+#MISE description="📜 Connect as admin user with pqsl | alias = connect-admin"
 #MISE quiet=true
 #______________________________________________________________________________
 

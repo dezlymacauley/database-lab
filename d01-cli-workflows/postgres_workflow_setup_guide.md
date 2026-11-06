@@ -62,6 +62,7 @@ _______________________________________________________________________________
 Create the rest of the workflow structure
 ```bash
 mkdir .mise-tasks
+touch .mise-tasks/backup-cluster.bash
 touch .mise-tasks/check-status.bash
 touch .mise-tasks/setup-cluster.bash
 chmod +x .mise-tasks/*.bash
@@ -75,12 +76,77 @@ touch .sqruff.ini
 ```
 _______________________________________________________________________________
 
+Add this to the `mise-tasks/backup-cluster.bash` file
+```bash
+#!/usr/bin/env bash
+#MISE description="📸 Backup the Postgres Cluster | alias = backup-cluster"
+#MISE quiet=true
+#______________________________________________________________________________
+
+# STEP: 1 => Ensure that the relevant environment variables are set
+
+set -euo pipefail
+
+: "${PGDATA:?Missing environment variable PGDATA}"
+: "${PGHOST:?Missing environment variable PGHOST}"
+: "${PGPORT:?Missing environment variable PGPORT}"
+: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${POSTGRES_BACKUP_DIRECTORY:?Missing environment variable POSTGRES_BACKUP_DIRECTORY}"
+#______________________________________________________________________________
+
+# STEP: 2 => Check if a valid Postgres cluster exists and the server is running
+
+if [[ ! -f "$PGDATA/PG_VERSION" ]]; then
+    printf "❌ No valid Postgres cluster was found.\n" >&2
+    exit 1
+fi
+
+if ! pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+    printf "❌ The Postgres server is not running.\n" >&2
+    exit 1
+fi
+
+printf "✅ Postgres cluster found and server is running.\n"
+#______________________________________________________________________________
+
+# STEP: 3 => Create a backup of the Postgres cluster
+
+printf "\n"
+printf "⏳ Creating Postgres cluster backup...\n"
+
+# Create the backup directory if it doesn't exist.
+mkdir -p -- "$POSTGRES_BACKUP_DIRECTORY"
+
+# Generate a timestamped backup filename.
+backup_file="$POSTGRES_BACKUP_DIRECTORY/postgres-$(date +%Y%m%d-%H%M%S).sql"
+
+# Restrict backup file permissions.
+umask 077
+
+if ! pg_dumpall \
+    --host="$PGHOST" \
+    --port="$PGPORT" \
+    --username=postgres \
+    --no-password \
+    --file="$backup_file"; then
+
+    rm -f -- "$backup_file"
+
+    printf "❌ Failed to create Postgres cluster backup.\n" >&2
+    exit 1
+fi
+
+printf "✅ Postgres cluster backup created:\n"
+printf "%s\n" "$backup_file"
+#______________________________________________________________________________
+```
+_______________________________________________________________________________
+
 Add this to the `.mise-tasks/check-status.bash` file
 ```bash
 #!/usr/bin/env bash
 #MISE description="🚥 Check the status of Postgres | alias = check-status"
 #MISE quiet=true
-
 #______________________________________________________________________________
 
 # STEP: 1 => Ensure that the relevant environment variables are set
@@ -106,7 +172,6 @@ fi
 
 printf "✅ A Postgres cluster was found at:\n"
 printf "%s\n" "$PGDATA"
-
 #______________________________________________________________________________
 
 # STEP: 3 => Check if the Postgres server is running
@@ -124,12 +189,56 @@ printf "\n"
 ```
 _______________________________________________________________________________
 
+Add this to the `mise-tasks/connect-admin.bash`
+```bash
+#!/usr/bin/env bash
+#MISE description="📜 Connect as admin user with pqsl | alias = connect-admin"
+#MISE quiet=true
+#______________________________________________________________________________
+
+# STEP: 1 => Ensure that a valid Postgres cluster exists and is running
+
+set -euo pipefail
+
+: "${PGDATA:?Missing environment variable PGDATA}"
+: "${PGHOST:?Missing environment variable PGHOST}"
+: "${PGPORT:?Missing environment variable PGPORT}"
+: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+
+if [[ ! -f "$PGDATA/PG_VERSION" ]]; then
+    printf "❌ No valid Postgres cluster was found.\n" >&2
+    exit 1
+fi
+
+if ! pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+    printf "❌ The Postgres server is not running.\n" >&2
+    exit 1
+fi
+
+printf "✅ Postgres cluster found and server is running.\n"
+#______________________________________________________________________________
+
+# STEP: 2 => Connect to the Postgres database as the postgres superuser
+
+printf "\n"
+printf "⏳ Connecting to Postgres...\n"
+
+exec psql \
+    --host="$PGHOST" \
+    --port="$PGPORT" \
+    --username=postgres \
+    --dbname=postgres \
+    --no-psqlrc
+#______________________________________________________________________________
+
+```
+_______________________________________________________________________________
+
 Add this to the `.mise-tasks/setup-cluster.bash` file
 ```bash
 #!/usr/bin/env bash
-#MISE description="🐘 Setup the Postgres Cluster | alias = setup-cluster"
+#MISE description="🏡 Setup the Postgres Cluster | alias = setup-cluster"
 #MISE quiet=true
-
 #______________________________________________________________________________
 
 # STEP: 1 => Ensure that the relevant environment variables are set
@@ -137,7 +246,6 @@ Add this to the `.mise-tasks/setup-cluster.bash` file
 set -euo pipefail
 
 : "${PGDATA:?Missing environment variable PGDATA}"
-: "${PGUSER:?Missing environment variable PGUSER}"
 : "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
 #______________________________________________________________________________
 
@@ -159,7 +267,7 @@ if [[ -e "$PGDATA" ]]; then
             if pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
                 printf "⏳ Stopping the Postgres server...\n"
 
-                # `-m fast` terminates existing connections 
+                # `-m fast` terminates existing connections
                 # and rolls back active transactions.
                 #
                 # `-w` waits until the server has completely stopped.
@@ -195,7 +303,7 @@ printf '%s\n' "$PGPASSWORD" > "$password_file"
 
 if ! initdb \
     -D "$PGDATA" \
-    -U "$PGUSER" \
+    -U postgres \
     --auth=scram-sha-256 \
     --pwfile="$password_file" > /dev/null; then
 

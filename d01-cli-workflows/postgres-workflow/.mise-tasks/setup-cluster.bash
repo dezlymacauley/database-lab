@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="🐘 Setup the Postgres Cluster | alias = setup-cluster"
+#MISE description="🏡 Setup the Postgres Cluster | alias = setup-cluster"
 #MISE quiet=true
 #______________________________________________________________________________
 

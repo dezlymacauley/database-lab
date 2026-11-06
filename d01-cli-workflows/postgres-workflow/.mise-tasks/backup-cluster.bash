@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="🐘 Backup the Postgres Cluster | alias = backup-cluster"
+#MISE description="📸 Backup the Postgres Cluster | alias = backup-cluster"
 #MISE quiet=true
 #______________________________________________________________________________
 
