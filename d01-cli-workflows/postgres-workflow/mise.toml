@@ -11,5 +11,6 @@ postgres = "latest"
 
 [shell_alias]
 check-status = "mise run check-status"
+menu = "mise tasks; echo; mise shell-alias ls"
 setup-cluster = "mise run setup-cluster"
 #______________________________________________________________________________

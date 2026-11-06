@@ -340,56 +340,13 @@ postgres = "latest"
 
 [shell_alias]
 check-status = "mise run check-status"
+menu = "mise tasks; echo; mise shell-alias ls"
 setup-cluster = "mise run setup-cluster"
 #______________________________________________________________________________
 ```
 _______________________________________________________________________________
 
-
-
-
-
-#______________________________________________________________________________
-
-[tasks.connect]
-description = "🪶 Connect to the SQLite database | alias = connect"
-quiet = true
-run = """
-mkdir -p .sqlite-databases
-litecli \
-    --liteclirc "$LITECLI_CONFIG_FILE" \
-    --database "$SQLITE_DATABASE_FILE"
-"""
-#______________________________________________________________________________
-
-[tasks.backup]
-description = "💾 Backup all SQLite databases | alias = backup"
-quiet = true
-run = """
-mkdir -p "$SQLITE_BACKUP_DIRECTORY"
-
-for db in .sqlite-databases/*.sqlite; do
-  [ -e "$db" ] || continue
-
-  base=$(basename "$db" .sqlite)
-  ts=$(date -u +"%Y%m%dT%H%M%SZ")
-
-  sqlite3 "$db" ".backup $SQLITE_BACKUP_DIRECTORY/${base}_${ts}.sqlite"
-done
-"""
-#______________________________________________________________________________
-
-[shell_alias]
-connect = "mise run connect"
-backup = "mise run backup"
-#______________________________________________________________________________
-
-_______________________________________________________________________________
-
-### Copy everything below and add to the `README.md` file
-_______________________________________________________________________________
-
-
+### Copy everything below to the `README.md` file
 
 # 🐘 Postgres Workflow
 _______________________________________________________________________________
@@ -435,3 +392,45 @@ check-status  mise run check-status
 setup-cluster mise run setup-cluster
 ```
 _______________________________________________________________________________
+
+
+
+## TODO
+
+
+
+#______________________________________________________________________________
+
+[tasks.connect]
+description = "🪶 Connect to the SQLite database | alias = connect"
+quiet = true
+run = """
+mkdir -p .sqlite-databases
+litecli \
+    --liteclirc "$LITECLI_CONFIG_FILE" \
+    --database "$SQLITE_DATABASE_FILE"
+"""
+#______________________________________________________________________________
+
+[tasks.backup]
+description = "💾 Backup all SQLite databases | alias = backup"
+quiet = true
+run = """
+mkdir -p "$SQLITE_BACKUP_DIRECTORY"
+
+for db in .sqlite-databases/*.sqlite; do
+  [ -e "$db" ] || continue
+
+  base=$(basename "$db" .sqlite)
+  ts=$(date -u +"%Y%m%dT%H%M%SZ")
+
+  sqlite3 "$db" ".backup $SQLITE_BACKUP_DIRECTORY/${base}_${ts}.sqlite"
+done
+"""
+#______________________________________________________________________________
+
+[shell_alias]
+connect = "mise run connect"
+backup = "mise run backup"
+#______________________________________________________________________________
+
