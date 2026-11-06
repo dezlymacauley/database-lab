@@ -6,23 +6,18 @@
 
 # STEP: 1 => Ensure that the relevant environment variables are set
 
-# This line ensures that the script will exit immediately if any commands
-# fails or if there are any missing variable
 set -euo pipefail
 
-# These are guard clauses. The script will fail automatically if any of
-# these environment variables are missing from `.env`.
-
-# This is a guard clause. The script will fail automatically if any of these
-# variables are missing in the `.env` file
 : "${PGDATA:?Missing environment variable PGDATA}"
 : "${PGHOST:?Missing environment variable PGHOST}"
 : "${PGPORT:?Missing environment variable PGPORT}"
 : "${PGUSER:?Missing environment variable PGUSER}"
+: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
 : "${PGDATABASE:?Missing environment variable PGDATABASE}"
+
 #______________________________________________________________________________
 
-# STEP: 2 => Check if there if a Postgres Cluster directory exists
+# STEP: 2 => Check if there is an existing PGDATA directory
 
 if [[ -e "$PGDATA" ]]; then
     printf "\n"
@@ -35,8 +30,23 @@ if [[ -e "$PGDATA" ]]; then
     case "$response" in
         [yY]|[yY][eE][sS])
             printf "\n"
-            printf "✅ Directory deletion confirmed.\n"
+
+            # Stop Postgres if the existing cluster is running.
+            if pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+                printf "⏳ Stopping the Postgres server...\n"
+
+                # `-m fast` terminates existing connections 
+                # and rolls back active transactions.
+                #
+                # `-w` waits until the server has completely stopped.
+                pg_ctl -D "$PGDATA" stop -m fast -w > /dev/null
+                printf "✅ Postgres server stopped.\n"
+            fi
+
+            # Delete the entire PGDATA directory.
             rm -rf -- "$PGDATA"
+
+            printf "✅ PGDATA directory deleted.\n"
             ;;
         *)
             printf "\n"
@@ -45,57 +55,37 @@ if [[ -e "$PGDATA" ]]; then
             ;;
     esac
 fi
-
 #______________________________________________________________________________
 
-# STEP: 3 => Check if the PGDATA directory contains a valid Postgres Cluster
+# STEP: 3 => Initialize a new Postgres cluster
 
-if [[ -d "$PGDATA" && ! -f "$PGDATA/PG_VERSION" ]]; then
-    printf "\n"
-    printf "❌ Invalid Postgres cluster at the PGDATA directory\n"
-    printf "\n"
+printf "\n"
+printf "⏳ Initializing Postgres cluster...\n"
+
+# Create a temporary password file with restricted permissions.
+umask 077
+password_file="$(mktemp)"
+trap 'rm -f -- "$password_file"' EXIT
+
+printf '%s\n' "$PGPASSWORD" > "$password_file"
+
+if ! initdb \
+    -D "$PGDATA" \
+    -U "$PGUSER" \
+    --auth=scram-sha-256 \
+    --pwfile="$password_file" > /dev/null; then
+
+    printf "❌ Failed to initialize Postgres cluster.\n" >&2
     exit 1
 fi
+
+# Disable checkpoint logging to reduce terminal noise.
+printf "log_checkpoints = off\n" >> "$PGDATA/postgresql.conf"
+
+printf "✅ Postgres cluster initialized.\n"
 #______________________________________________________________________________
 
-# STEP: 4 => Stop the Postgres server if it is running
-
-if pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
-    printf "\n"
-    printf "⏳ Stopping the Postgres server...\n"
-
-    # `-m fast` terminates existing connections and rolls back active transactions.
-    # `-w` waits until the server has completely stopped.
-    pg_ctl -D "$PGDATA" stop -m fast -w > /dev/null
-
-    printf "✅ Postgres server stopped.\n"
-else
-    printf "\n"
-    printf "✅ No Postgres server is running for this cluster.\n"
-fi
-#______________________________________________________________________________
-
-
-# Initialize a new Postgres cluster using the login user name.
-# `-D` specifies the location of the cluster.
-# `-U` specifies the initial database superuser.
-# `--auth=trust` enables passwordless authentication.
-# printf "\n"
-# printf "⏳ Initializing Postgres cluster...\n"
-#
-# if ! initdb -D "$PGDATA" -U "$PGUSER" --auth=trust > /dev/null; then
-#     printf "❌ Failed to initialize Postgres cluster.\n"
-#     exit 1
-# fi
-#
-# # Disable checkpoint logging to reduce terminal noise.
-# printf "log_checkpoints = off\n" >> "$PGDATA/postgresql.conf"
-#
-# printf "✅ Postgres cluster initialized.\n"
-
-#______________________________________________________________________________
-
-# STEP: 4 => Create the default database
+# STEP: 4 => Create the database in the Postgres Cluster
 
 # Start the Postgres server with a log file,
 # listening on the host and port from the `.env` file.

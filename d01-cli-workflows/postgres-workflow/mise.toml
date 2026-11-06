@@ -1,6 +1,5 @@
 [env]
 _.file = ".env"
-
 #______________________________________________________________________________
 
 [tools]
@@ -12,3 +11,4 @@ postgres = "latest"
 [shell_alias]
 check-status = "mise run check-status"
 setup-cluster = "mise run setup-cluster"
+#______________________________________________________________________________
