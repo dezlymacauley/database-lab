@@ -137,12 +137,8 @@ Add this to the `.mise-tasks/setup-cluster.bash` file
 set -euo pipefail
 
 : "${PGDATA:?Missing environment variable PGDATA}"
-: "${PGHOST:?Missing environment variable PGHOST}"
-: "${PGPORT:?Missing environment variable PGPORT}"
 : "${PGUSER:?Missing environment variable PGUSER}"
 : "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
-: "${PGDATABASE:?Missing environment variable PGDATABASE}"
-
 #______________________________________________________________________________
 
 # STEP: 2 => Check if there is an existing PGDATA directory
@@ -236,15 +232,24 @@ Add this to the `.gitignore` file.
 ```
 _______________________________________________________________________________
 
-Add this to the `.env_examples` file
+Add this to the `.env_example` file
 ```env
 # vim: filetype=env
+# Helps Neovim provide the correct syntax highlighting for this file
+#______________________________________________________________________________
+
+# Used by tasks: `check-status`, and `setup-cluster`
 PGDATA=".postgres"
+#______________________________________________________________________________
+
+# Used by task: `setup-cluster`
+PGUSER="postgres"
+PGPASSWORD="postgres"
+#______________________________________________________________________________
+
 PGHOST="127.0.0.1"
 PGPORT="5432"
 
-PGUSER="postgres"
-PGPASSWORD="postgres"
 PGDATABASE="starter_database"
 
 PGCLI_CONFIG_FILE=".pgcli_config.ini"
@@ -256,12 +261,21 @@ Add this to the `.env` file to use the starter settings,
 or use your own custom values
 ```env
 # vim: filetype=env
+# Helps Neovim provide the correct syntax highlighting for this file
+#______________________________________________________________________________
+
+# Used by tasks: `check-status`, and `setup-cluster`
 PGDATA=".postgres"
+#______________________________________________________________________________
+
+# Used by task: `setup-cluster`
+PGUSER="postgres"
+PGPASSWORD="postgres"
+#______________________________________________________________________________
+
 PGHOST="127.0.0.1"
 PGPORT="5432"
 
-PGUSER="postgres"
-PGPASSWORD="postgres"
 PGDATABASE="starter_database"
 
 PGCLI_CONFIG_FILE=".pgcli_config.ini"

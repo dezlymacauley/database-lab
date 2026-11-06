@@ -9,12 +9,8 @@
 set -euo pipefail
 
 : "${PGDATA:?Missing environment variable PGDATA}"
-: "${PGHOST:?Missing environment variable PGHOST}"
-: "${PGPORT:?Missing environment variable PGPORT}"
 : "${PGUSER:?Missing environment variable PGUSER}"
 : "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
-: "${PGDATABASE:?Missing environment variable PGDATABASE}"
-
 #______________________________________________________________________________
 
 # STEP: 2 => Check if there is an existing PGDATA directory
@@ -94,71 +90,3 @@ pg_ctl -D "$PGDATA" -l "$PGDATA/server.log" start -w > /dev/null
 
 printf "✅ Postgres server started successfully.\n"
 #______________________________________________________________________________
-
-
-
-
-
-
-
-
-
-
-
-# Start the Postgres server with a log file,
-# listening on the host and port from the `.env` file.
-# printf "\n"
-# printf "⏳ Starting Postgres server...\n"
-#
-# if ! pg_ctl -D "$PGDATA" \
-#     -l "$PGDATA/logfile" \
-#     -o "-h $PGHOST -p $PGPORT" \
-#     -w start > /dev/null; then
-#
-#     printf "\n"
-#     printf "❌ Postgres server failed to start.\n"
-#     printf "\n"
-#     printf "Postgres startup log:\n"
-#
-#     if [[ -f "$PGDATA/logfile" ]]; then
-#         tail -n 40 "$PGDATA/logfile"
-#     fi
-#
-#     exit 1
-# fi
-#
-# printf "✅ Postgres server started.\n"
-#
-# # Confirm that Postgres is accepting connections.
-# if ! pg_isready -q \
-#     -h "$PGHOST" \
-#     -p "$PGPORT" \
-#     -U "$PGUSER" \
-#     -d postgres; then
-#
-#     printf "❌ Postgres is not accepting connections.\n"
-#     exit 1
-# fi
-#
-# printf "✅ Postgres is accepting connections.\n"
-#
-# # Create the default database.
-# printf "\n"
-# printf "⏳ Creating default database: %s\n" "$PGDATABASE"
-#
-# if ! createdb \
-#     -h "$PGHOST" \
-#     -p "$PGPORT" \
-#     -U "$PGUSER" \
-#     "$PGDATABASE"; then
-#
-#     printf "❌ Failed to create database.\n"
-#     exit 1
-# fi
-#
-# printf "✅ Default database created.\n"
-#
-# printf "\n"
-# printf "🐘 Postgres cluster setup successful.\n"
-# printf "\n"
-
