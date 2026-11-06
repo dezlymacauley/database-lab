@@ -85,7 +85,25 @@ printf "log_checkpoints = off\n" >> "$PGDATA/postgresql.conf"
 printf "✅ Postgres cluster initialized.\n"
 #______________________________________________________________________________
 
-# STEP: 4 => Create the database in the Postgres Cluster
+# STEP: 4 => Start the Postgres server
+
+printf "\n"
+printf "⏳ Starting the Postgres server...\n"
+
+pg_ctl -D "$PGDATA" -l "$PGDATA/server.log" start -w > /dev/null
+
+printf "✅ Postgres server started successfully.\n"
+#______________________________________________________________________________
+
+
+
+
+
+
+
+
+
+
 
 # Start the Postgres server with a log file,
 # listening on the host and port from the `.env` file.
@@ -144,4 +162,3 @@ printf "✅ Postgres cluster initialized.\n"
 # printf "🐘 Postgres cluster setup successful.\n"
 # printf "\n"
 
-#______________________________________________________________________________

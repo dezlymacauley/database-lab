@@ -20,6 +20,7 @@ Add this to the `mise.toml` file
 ```toml
 [env]
 _.file = ".env"   
+LOCAL_MODE = true
 ```
 _______________________________________________________________________________
 
@@ -49,6 +50,7 @@ Your `mise.toml` file should look like this now:
 ```toml
 [env]
 _.file = ".env"   
+LOCAL_MODE = true
 
 [tools]
 "github:quarylabs/sqruff" = "latest"
@@ -68,6 +70,7 @@ touch .env
 touch .env_example
 touch .gitignore
 touch .pgcli.ini
+touch README.md
 touch .sqruff.ini
 ```
 _______________________________________________________________________________
@@ -123,7 +126,102 @@ _______________________________________________________________________________
 
 Add this to the `.mise-tasks/setup-cluster.bash` file
 ```bash
+#!/usr/bin/env bash
+#MISE description="🐘 Setup the Postgres Cluster | alias = setup-cluster"
+#MISE quiet=true
 
+#______________________________________________________________________________
+
+# STEP: 1 => Ensure that the relevant environment variables are set
+
+set -euo pipefail
+
+: "${PGDATA:?Missing environment variable PGDATA}"
+: "${PGHOST:?Missing environment variable PGHOST}"
+: "${PGPORT:?Missing environment variable PGPORT}"
+: "${PGUSER:?Missing environment variable PGUSER}"
+: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${PGDATABASE:?Missing environment variable PGDATABASE}"
+
+#______________________________________________________________________________
+
+# STEP: 2 => Check if there is an existing PGDATA directory
+
+if [[ -e "$PGDATA" ]]; then
+    printf "\n"
+    printf "🛑 You already have a PGDATA directory at:\n"
+    printf "%s\n" "$PGDATA"
+    printf "\n"
+
+    read -r -p "Delete the PGDATA directory? [y/n]: " response
+
+    case "$response" in
+        [yY]|[yY][eE][sS])
+            printf "\n"
+
+            # Stop Postgres if the existing cluster is running.
+            if pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
+                printf "⏳ Stopping the Postgres server...\n"
+
+                # `-m fast` terminates existing connections 
+                # and rolls back active transactions.
+                #
+                # `-w` waits until the server has completely stopped.
+                pg_ctl -D "$PGDATA" stop -m fast -w > /dev/null
+                printf "✅ Postgres server stopped.\n"
+            fi
+
+            # Delete the entire PGDATA directory.
+            rm -rf -- "$PGDATA"
+
+            printf "✅ PGDATA directory deleted.\n"
+            ;;
+        *)
+            printf "\n"
+            printf "❌ Setup cancelled. Existing directory was preserved.\n"
+            exit 0
+            ;;
+    esac
+fi
+#______________________________________________________________________________
+
+# STEP: 3 => Initialize a new Postgres cluster
+
+printf "\n"
+printf "⏳ Initializing Postgres cluster...\n"
+
+# Create a temporary password file with restricted permissions.
+umask 077
+password_file="$(mktemp)"
+trap 'rm -f -- "$password_file"' EXIT
+
+printf '%s\n' "$PGPASSWORD" > "$password_file"
+
+if ! initdb \
+    -D "$PGDATA" \
+    -U "$PGUSER" \
+    --auth=scram-sha-256 \
+    --pwfile="$password_file" > /dev/null; then
+
+    printf "❌ Failed to initialize Postgres cluster.\n" >&2
+    exit 1
+fi
+
+# Disable checkpoint logging to reduce terminal noise.
+printf "log_checkpoints = off\n" >> "$PGDATA/postgresql.conf"
+
+printf "✅ Postgres cluster initialized.\n"
+#______________________________________________________________________________
+
+# STEP: 4 => Start the Postgres server
+
+printf "\n"
+printf "⏳ Starting the Postgres server...\n"
+
+pg_ctl -D "$PGDATA" -l "$PGDATA/server.log" start -w > /dev/null
+
+printf "✅ Postgres server started successfully.\n"
+#______________________________________________________________________________
 ```
 _______________________________________________________________________________
 
@@ -230,8 +328,8 @@ _______________________________________________________________________________
 Update the `mise.toml` file to look like this
 ```toml
 [env]
-_.file = ".env"
-
+_.file=".env"
+LOCAL_MODE = true
 #______________________________________________________________________________
 
 [tools]
@@ -241,8 +339,9 @@ postgres = "latest"
 #______________________________________________________________________________
 
 [shell_alias]
-server-status = "mise run server-status"
+check-status = "mise run check-status"
 setup-cluster = "mise run setup-cluster"
+#______________________________________________________________________________
 ```
 _______________________________________________________________________________
 
@@ -284,25 +383,55 @@ done
 connect = "mise run connect"
 backup = "mise run backup"
 #______________________________________________________________________________
+
+_______________________________________________________________________________
+
+### Copy everything below and add to the `README.md` file
+_______________________________________________________________________________
+
+
+
+# 🐘 Postgres Workflow
+_______________________________________________________________________________
+
+## Setup
+
+If you ever want to setup your workflow after cloning this directory,
+or moving it to a different location, just run the three commands below:
+```sh
+mise trust
+chmod +x .mise-tasks/*.bash
+mise install
 ```
 _______________________________________________________________________________
 
+## Usage
+
 Run this command to view your list of available `mise` tasks
-```sh
+```bash
 mise tasks
 ```
 
 You should see this
 ```
-Name     Description
-backup   💾 Backup all SQLite databases | alias = backup
-connect  🪶 Connect to the SQLite database | alias = connect
+Name           Description
+check-status   🚥 Check the status of Postgres | alias = check-status
+setup-cluster  🐘 Setup the Postgres Cluster | alias = setup-cluster
 ```
+
+You can run a command by using the syntax:
+`mise run name-of-command` or just the alias `name-of-command`
 _______________________________________________________________________________
 
-If you ever want to setup your workflow after cloning this directory,
-or moving it to a different location, just run the command below:
-```sh
-mise trust && mise install
+Run this command to view list of shell-aliases:
+```bash
+mise shell-alias ls
+```
+
+You should see this
+```
+alias         command
+check-status  mise run check-status
+setup-cluster mise run setup-cluster
 ```
 _______________________________________________________________________________
