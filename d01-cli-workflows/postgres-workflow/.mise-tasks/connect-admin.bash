@@ -10,7 +10,7 @@ set -euo pipefail
 : "${PGDATA:?Missing environment variable PGDATA}"
 : "${PGHOST:?Missing environment variable PGHOST}"
 : "${PGPORT:?Missing environment variable PGPORT}"
-: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${POSTGRES_PASSWORD:?Missing environment variable POSTGRES_PASSWORD}"
 
 if [[ ! -f "$PGDATA/PG_VERSION" ]]; then
     printf "❌ No valid Postgres cluster was found.\n" >&2
@@ -21,8 +21,6 @@ if ! pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
     printf "❌ The Postgres server is not running.\n" >&2
     exit 1
 fi
-
-printf "✅ Postgres cluster found and server is running.\n"
 #______________________________________________________________________________
 
 # STEP: 2 => Connect to the Postgres database as the postgres superuser
@@ -30,10 +28,11 @@ printf "✅ Postgres cluster found and server is running.\n"
 printf "\n"
 printf "⏳ Connecting to Postgres...\n"
 
-exec psql \
+PGPASSWORD="$POSTGRES_PASSWORD" exec psql \
     --host="$PGHOST" \
     --port="$PGPORT" \
     --username=postgres \
     --dbname=postgres \
-    --no-psqlrc
+    --no-psqlrc \
+    --no-password
 #______________________________________________________________________________

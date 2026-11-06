@@ -207,7 +207,7 @@ set -euo pipefail
 : "${PGDATA:?Missing environment variable PGDATA}"
 : "${PGHOST:?Missing environment variable PGHOST}"
 : "${PGPORT:?Missing environment variable PGPORT}"
-: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${POSTGRES_PASSWORD:?Missing environment variable POSTGRES_PASSWORD}"
 
 if [[ ! -f "$PGDATA/PG_VERSION" ]]; then
     printf "❌ No valid Postgres cluster was found.\n" >&2
@@ -218,8 +218,6 @@ if ! pg_ctl -D "$PGDATA" status > /dev/null 2>&1; then
     printf "❌ The Postgres server is not running.\n" >&2
     exit 1
 fi
-
-printf "✅ Postgres cluster found and server is running.\n"
 #______________________________________________________________________________
 
 # STEP: 2 => Connect to the Postgres database as the postgres superuser
@@ -442,34 +440,40 @@ Add this to the `.env_example` and the `.env` file
 # Helps Neovim provide the correct syntax highlighting for this file
 #______________________________________________________________________________
 
-# Used by the tasks: 
-# `check-status`, `setup-cluster`, `connect-admin`
-PGDATA=".postgres"
+# SECTION: 1 => Root Password (Please set a strong password in the .env file)
+
+# POSTGRES_PASSWORD is the password for the user called `postgres`
+
+# This `postgres` user is automatically created when you run `setup-cluster`
+# to create a new Postgres Cluster
+
+# Think of the `postgres` user as special user that has full permission
+# to create, read, update, and delete all databases in the Postgres Cluster.
+# This `postgres` user also has the ability to create new users and give
+# those users permission to perform certain actions.
+
+POSTGRES_PASSWORD="postgres"
 #______________________________________________________________________________
 
-# Used by the tasks: 
-# `setup-cluster`, `connect-admin`
-PGPASSWORD="postgres"
-#______________________________________________________________________________
+# SECTION: 2 => Database Client and Backup Settings
 
-# Used by the tasks: 
-# `setup-cluster`, `connect-admin`
-PGHOST="127.0.0.1"
-#______________________________________________________________________________
+# The location of the file used to customize `pgcli`
+PGCLI_CONFIG_FILE=".pgcli.ini"
 
-# Used by the tasks: 
-# `connect-admin`
-PGPORT="5432"
-#______________________________________________________________________________
-
-# Used by the tasks:
-# `backup-cluster`
+# This is where backups of the Postgres cluster will be saved when you
+# run the command: `backup-cluster`
 POSTGRES_BACKUP_DIRECTORY="$HOME/local-workspace/postgres-database-backups"
 #______________________________________________________________________________
 
-PGUSER="postgres"
-PGDATABASE="postgres"
-PGCLI_CONFIG_FILE=".pgcli.ini"
+# SECTION: 3 => Connection Settings 
+
+PGDATA=".postgres"
+PGHOST="127.0.0.1"
+PGPORT="5432"
+DATABASE_NAME="value"
+
+USER_NAME="value"
+USER_PASSWORD="value"
 #______________________________________________________________________________
 ```
 _______________________________________________________________________________
