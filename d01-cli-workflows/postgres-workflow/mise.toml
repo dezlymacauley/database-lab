@@ -11,8 +11,9 @@ postgres = "latest"
 
 [shell_alias]
 backup-cluster = "mise run backup-cluster"
-connect-admin = "mise run connect-admin"
 check-status = "mise run check-status"
+connect-admin = "mise run connect-admin"
 menu = "mise tasks; echo; mise shell-alias ls"
 setup-cluster = "mise run setup-cluster"
+toggle-server = "mise run toggle-server"
 #______________________________________________________________________________
