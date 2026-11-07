@@ -1,5 +1,7 @@
 /*
-    ABOUT: Managing Roles
+    ABOUT: Using roles as membership groups
+
+    In Postgres a role a named collection of rules
 
     The user `postgres` is meant for administrative tasks.
     It should not be used for interacting with databases,
@@ -51,34 +53,93 @@
 
 -- SECTION: 1 => Login to the `postgres` database as the `postgres` user
 
+-- For my workflow I just run this command
+
+/*
+    connect-admin
+*/
 -------------------------------------------------------------------------------
 
--- SECTION: 2 => Create the developer role
+-- SECTION: 2 => Understanding role permissions
+
+-- NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+
+-- Here's what the line above means:
+
+-- NOLOGIN 
+-- I don't want the `postgres_lab_developer` role on its own to be used as
+-- a way to login to the `postgres_lab` database without a user.
+-- I'm using the `postgres_lab_developer` role as collection of rules
+-- (think of it as a membership group) that users can be part of.
+-- Then a user that is a member of `postgres_lab_developer` will be able to
+-- log into the database.
+
+-- NOSUPERUSER
+-- A member of the `postgres_lab_developer` role cannot have 
+-- unrestricted administrator privileges.
+-- A superuser has full access to perform all kinds of actions 
+-- on databases in the Postgres. E.g. the user called `Postgres` is an
+-- example of a superuser.
+
+-- NOCREATEDB
+-- This role cannot create new databases.
+
+-- NOCREATEROLE
+-- This role cannot create or manage other PostgreSQL roles.
+-- Remember: PostgreSQL users are also roles.
+
+-- NOREPLICATION
+-- This role cannot perform special PostgreSQL replication operations.
+-- Replication is used to copy and synchronise data between servers.
+
+-- This role cannot bypass Row-Level Security (RLS).
+-- RLS allows PostgreSQL to restrict which rows a user can access.
+-- E.g. A company could use RLS to ensure that employees only see records 
+-- that belong to their department.
+-------------------------------------------------------------------------------
+
+-- SECTION: 3 => Creating the roles
+
+-- The naming convention I follow when creating a role is:
+-- database_name_the_type_of_actions
 
 CREATE ROLE postgres_lab_developer
-NOLOGIN
-NOSUPERUSER
-NOCREATEDB
-NOCREATEROLE
-NOREPLICATION
-NOBYPASSRLS;
--------------------------------------------------------------------------------
-
--- `NOLOGIN` means that the `postgres_lab_developer` user
-
--------------------------------------------------------------------------------
-
--- SECTION: 3 => Create the readonly role
+NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 
 CREATE ROLE postgres_lab_readonly
-NOLOGIN
-NOSUPERUSER
-NOCREATEDB
-NOCREATEROLE
-NOREPLICATION
-NOBYPASSRLS;
-
+NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 -------------------------------------------------------------------------------
+
+-- SECTION: 3 => Viewing the `roles` of a Postgres Cluster
+
+/*
+
+\x on
+
+\du
+
+*/
+-------------------------------------------------------------------------------
+
+-- You should see this
+
+/*
+
+List of roles
+-[ RECORD 1 ]----------------------------------------------------------
+Role name  | postgres
+Attributes | Superuser, Create role, Create DB, Replication, Bypass RLS
+-[ RECORD 2 ]----------------------------------------------------------
+Role name  | postgres_lab_developer
+Attributes | Cannot login
+-[ RECORD 3 ]----------------------------------------------------------
+Role name  | postgres_lab_readonly
+Attributes | Cannot login
+
+*/
+-------------------------------------------------------------------------------
+
+
 
 
 -- SECTION: 3 => Configure database access
