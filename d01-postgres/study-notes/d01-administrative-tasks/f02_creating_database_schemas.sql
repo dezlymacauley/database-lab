@@ -48,7 +48,7 @@
             |   +-- Table 2
             |   +-- Table 3
             |
-            +-- Schema 2: studies
+            +-- Schema 2: study_notes
                 |
                 +-- Table 1
                 +-- Table 2
@@ -142,5 +142,46 @@ Owner | pg_database_owner
 -- NOTE: Postgres does to force you to create additional database schemas
 
 -- If a database has only a small number of tables, you could just put all
--- of those tables inside the default schema.
+-- of those tables inside the `default` schema.
+-------------------------------------------------------------------------------
+
+-- SECTION: 4 => Creating a database schema
+
+-- To create a new schema in the `postgres_lab` database called `study_notes`,
+-- run this SQL command:
+
+CREATE SCHEMA study_notes;
+-------------------------------------------------------------------------------
+
+-- To view the schemas in the current database, run:
+
+/*
+
+\dn
+
+*/
+-------------------------------------------------------------------------------
+
+-- Your output should now look something like this:
+
+/*
+
+List of schemas
+
+-[ RECORD 1 ]------------
+Name  | public
+Owner | pg_database_owner
+
+-[ RECORD 2 ]------------
+Name  | study_notes
+Owner | postgres
+
+*/
+-------------------------------------------------------------------------------
+
+-- SECTION: 5 => Deleting a schema
+
+DROP SCHEMA study_notes;
+
+-- I'll keep this schema because I plan to use it in future guides.
 -------------------------------------------------------------------------------
