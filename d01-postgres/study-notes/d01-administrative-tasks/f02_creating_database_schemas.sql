@@ -134,15 +134,15 @@ Owner | pg_database_owner
 
 -- Every newly created PostgreSQL database has a default schema 
 -- called `public`.
--- The `Owner` value of this schema is also set to `pg_database_owner` 
+-- The `Owner` value of this schema is also set to `pg_database_owner`.
 
 -- Any new database you create will have these exact settings.
 -------------------------------------------------------------------------------
 
--- NOTE: Postgres does to force you to create additional database schemas
+-- NOTE: Postgres does not force you to create additional database schemas
 
 -- If a database has only a small number of tables, you could just put all
--- of those tables inside the `default` schema.
+-- of those tables inside the default schema.
 -------------------------------------------------------------------------------
 
 -- SECTION: 4 => Creating a database schema
@@ -181,7 +181,7 @@ Owner | postgres
 
 -- SECTION: 5 => Deleting a schema
 
-DROP SCHEMA study_notes;
+-- DROP SCHEMA study_notes;
 
 -- I'll keep this schema because I plan to use it in future guides.
 -------------------------------------------------------------------------------
