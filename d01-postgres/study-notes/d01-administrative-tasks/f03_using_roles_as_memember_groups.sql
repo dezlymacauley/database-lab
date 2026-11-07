@@ -60,6 +60,13 @@
 */
 -------------------------------------------------------------------------------
 
+-- Login to the `postgres_lab` database
+
+/*
+    \c postgres_lab
+*/
+-------------------------------------------------------------------------------
+
 -- SECTION: 2 => Understanding role permissions
 
 -- NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
@@ -151,5 +158,31 @@ TO postgres_lab_developer;
 
 -- Allow the readonly role to connect to postgres_lab.
 GRANT CONNECT ON DATABASE postgres_lab
+TO postgres_lab_readonly;
+-------------------------------------------------------------------------------
+
+-- SECTION: 6 => Specify what schemas a member of the role should
+-- be allowed to access
+
+-- Allow the developer role to access and create objects inside `study_notes`.
+GRANT USAGE, CREATE ON SCHEMA study_notes
+TO postgres_lab_developer;
+
+-- Allow the readonly role to access objects inside `study_notes`.
+GRANT USAGE ON SCHEMA study_notes
+TO postgres_lab_readonly;
+-------------------------------------------------------------------------------
+
+-- SECTION: 7 => Specify what table operations a member of the role should
+-- be allowed to perform on existing tables
+
+-- Allow the developer role to perform CRUD operations on all existing tables
+-- inside the `study_notes` schema.
+GRANT INSERT, SELECT, UPDATE, DELETE ON ALL TABLES IN SCHEMA study_notes
+TO postgres_lab_developer;
+
+-- Allow the readonly role to read all existing tables
+-- inside the `study_notes` schema.
+GRANT SELECT ON ALL TABLES IN SCHEMA study_notes
 TO postgres_lab_readonly;
 -------------------------------------------------------------------------------
