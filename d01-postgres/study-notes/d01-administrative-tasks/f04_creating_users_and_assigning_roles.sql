@@ -98,12 +98,12 @@ Grantor   | postgres
 
 -- SECTION: 4 => How to revoke a role and delete a user
 
+-- NOTE: I'm going to keep the `kate_kendall` user for future guides
+-- This is just an example of how to delete a user.
+
 -- Remove `kate_kendall` from the readonly role.
 REVOKE postgres_lab_readonly FROM kate_kendall;
 
 -- Delete the user
 DROP USER kate_kendall;
-
--- NOTE: I'm going to keep the `kate_kendall` user for future guides
-
 -------------------------------------------------------------------------------
