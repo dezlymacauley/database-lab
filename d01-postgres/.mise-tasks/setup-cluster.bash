@@ -8,7 +8,7 @@
 set -euo pipefail
 
 : "${PGDATA:?Missing environment variable PGDATA}"
-: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${POSTGRES_PASSWORD:?Missing environment variable POSTGRES_PASSWORD}"
 #______________________________________________________________________________
 
 # STEP: 2 => Check if there is an existing PGDATA directory
@@ -61,7 +61,7 @@ umask 077
 password_file="$(mktemp)"
 trap 'rm -f -- "$password_file"' EXIT
 
-printf '%s\n' "$PGPASSWORD" > "$password_file"
+printf '%s\n' "$POSTGRES_PASSWORD" > "$password_file"
 
 if ! initdb \
     -D "$PGDATA" \
