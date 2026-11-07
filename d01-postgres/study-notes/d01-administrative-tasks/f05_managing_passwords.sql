@@ -76,8 +76,6 @@ ORDER BY rolname;
 
 -- SECTION: 2 => Checking which roles do not have a password set 
 
-/*
-
 SELECT
     rolname,
     rolcanlogin,
@@ -87,8 +85,6 @@ WHERE
     rolcanlogin = TRUE
     AND rolpassword IS NULL
 ORDER BY rolname;
-
-*/
 
 -------------------------------------------------------------------------------
 
@@ -130,4 +126,35 @@ ORDER BY rolname;
 (0 rows)
 
 */
+-------------------------------------------------------------------------------
+
+-- SECTION: 4 => How to check when the passwords of each role will expire
+
+SELECT
+    rolname,
+    rolvaliduntil
+FROM pg_authid
+WHERE rolcanlogin = TRUE
+ORDER BY rolname;
+-------------------------------------------------------------------------------
+
+-- This shows that non of the paswords for the user below have 
+-- an expiry date.
+
+/*
+
+    rolname     | rolvaliduntil
+----------------+---------------
+ dezly_macauley |
+ kate_kendall   |
+ postgres       |
+(3 rows)
+
+*/
+-------------------------------------------------------------------------------
+
+-- SECTION: 5 => How to set expiry dates for the password
+
+
+
 -------------------------------------------------------------------------------
