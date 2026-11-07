@@ -186,3 +186,8 @@ TO postgres_lab_developer;
 GRANT SELECT ON ALL TABLES IN SCHEMA study_notes
 TO postgres_lab_readonly;
 -------------------------------------------------------------------------------
+
+-- NOTE: A role does not have the ability to grant a user permission to log
+-- into Postgres. That is something that you set at an individual level when
+-- you create the user.
+-------------------------------------------------------------------------------
