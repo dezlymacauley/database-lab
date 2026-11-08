@@ -1,5 +1,7 @@
 /*
     ABOUT: Using roles as membership groups
+    
+    ___________________________________________________________________________
 
     In Postgres a role a named collection of rules
 
