@@ -10,7 +10,7 @@ set -euo pipefail
 : "${PGDATA:?Missing environment variable PGDATA}"
 : "${PGHOST:?Missing environment variable PGHOST}"
 : "${PGPORT:?Missing environment variable PGPORT}"
-: "${PGPASSWORD:?Missing environment variable PGPASSWORD}"
+: "${POSTGRES_PASSWORD:?Missing environment variable POSTGRES_PASSWORD}"
 : "${POSTGRES_BACKUP_DIRECTORY:?Missing environment variable POSTGRES_BACKUP_DIRECTORY}"
 #______________________________________________________________________________
 
@@ -43,7 +43,7 @@ backup_file="$POSTGRES_BACKUP_DIRECTORY/postgres-$(date +%Y%m%d-%H%M%S).sql"
 # Restrict backup file permissions.
 umask 077
 
-if ! pg_dumpall \
+if ! PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall \
     --host="$PGHOST" \
     --port="$PGPORT" \
     --username=postgres \
