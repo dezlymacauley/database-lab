@@ -1,5 +1,5 @@
 /*
-    ABOUT: Creating Database Schemas
+    ABOUT: Creating Database Schemas (aka database namespaces)
 
     In the previous guide, I created a database called `postgres_lab`.
 
@@ -141,13 +141,17 @@ Owner | pg_database_owner
 
 -- NOTE: Postgres does not force you to create additional database schemas
 
--- If a database has only a small number of tables, you could just put all
--- of those tables inside the default schema.
+-- If a database has only a small number of tables, 
+-- you can just create tables without specifying a database schema 
+-- and Postgres will just just put all 
+-- of those tables inside the `public` schema.
 -------------------------------------------------------------------------------
 
 -- SECTION: 4 => Creating a database schema
 
--- To create a new schema in the `postgres_lab` database called `study_notes`,
+-- To create a new database schema (aka database namespace) 
+-- in the `postgres_lab` database 
+-- called `study_notes`,
 -- run this SQL command:
 
 CREATE SCHEMA study_notes;
@@ -166,22 +170,18 @@ CREATE SCHEMA study_notes;
 
 /*
 
-List of schemas
-
--[ RECORD 1 ]------------
-Name  | public
-Owner | pg_database_owner
-
--[ RECORD 2 ]------------
-Name  | study_notes
-Owner | postgres
+         List of schemas
+    Name     |       Owner
+-------------+-------------------
+ public      | pg_database_owner
+ study_notes | postgres
 
 */
 -------------------------------------------------------------------------------
 
 -- SECTION: 5 => Deleting a schema
 
--- DROP SCHEMA study_notes;
+-- NOTE:  I'll keep this schema because I plan to use it in future guides.
 
--- I'll keep this schema because I plan to use it in future guides.
+DROP SCHEMA study_notes;
 -------------------------------------------------------------------------------

@@ -7,7 +7,9 @@
 
 -- SECTION: 1 => Connecting to the `postgres` database 
 
--- Use `psql` to login to the `postgres` database using the `postgres` 
+-- Use `psql` to log in to the `postgres` database
+-- using the `postgres` user.
+
 -- For my workflow I can do this by running this command:
 
 /*
@@ -42,8 +44,17 @@ postgres=#
 
 -- SECTION: 2 => Viewing the databases in your Postgres Cluster
 
--- A Postgres cluster is a group of Postgres databases,
--- that you can log into with a Postgres user
+-- A PostgreSQL cluster is a collection of databases.
+
+-- PostgreSQL uses a client-server model.
+
+-- A PostgreSQL server is a continuously running program
+-- that allows clients to connect to its databases.
+
+-- Database clients are programs like `psql` and `pgcli`
+-- that allow you to interact with a PostgreSQL server.
+
+-------------------------------------------------------------------------------
 
 -- You are now logged into the database called `postgres`
 -- using the user called `postgres`
@@ -115,6 +126,40 @@ postgres=#
 /*
 
 \x off
+
+*/
+-------------------------------------------------------------------------------
+
+-- SECTION: 4 => How to check what user and database you are connected to 
+
+
+/*
+
+\conninfo
+
+*/
+-------------------------------------------------------------------------------
+
+-- You'll get an output like this
+
+/*
+
+      Connection Information
+      Parameter       |   Value
+----------------------+-----------
+ Database             | postgres
+ Client User          | postgres
+ Host                 | 127.0.0.1
+ Server Port          | 5432
+ Options              |
+ Protocol Version     | 3.0
+ Password Used        | true
+ GSSAPI Authenticated | false
+ Backend PID          | 69374
+ SSL Connection       | false
+ Superuser            | on
+ Hot Standby          | off
+(12 rows)
 
 */
 -------------------------------------------------------------------------------
