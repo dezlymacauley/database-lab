@@ -3,19 +3,14 @@
 */
 -------------------------------------------------------------------------------
 
--- Every Postgres Cluster has a system table called `pg_authid`.
--- It stores information about all PostgreSQL roles.
--- The `pg_authid` table contains many roles and columns.
-
--------------------------------------------------------------------------------
-
 -- SECTION: 1 => The `pg_authid` table
 
+-- Postgres has a built-in table called `pg_authid`
 -- You can view a list of the columns in the `pg_authid` table 
 -- with this command:
 
 /*
-    postgres_lab=# \d pg_authid
+    \d pg_authid
 */
 -------------------------------------------------------------------------------
 
@@ -40,16 +35,14 @@
  rolvaliduntil  | timestamp with time zone |           |          |
 Indexes:
     "pg_authid_oid_index" PRIMARY KEY, btree (oid), tablespace "pg_global"
-    "pg_authid_rolname_index" UNIQUE CONSTRAINT, btree (rolname), 
-    tablespace "pg_global"
+    "pg_authid_rolname_index" UNIQUE CONSTRAINT, btree (rolname), tablespace "pg_global"
 Tablespace: "pg_global"
 
 */
 -------------------------------------------------------------------------------
 
--- You can view the rows of a table by using SQL.
+-- You can view the rows of a table by using a SQL statement.
 -- To be more specific, a `SELECT` statement.
--------------------------------------------------------------------------------
 
 -- The basic syntax is:
 -- SELECT column_name FROM table_name;
@@ -72,6 +65,19 @@ SELECT
 FROM pg_authid
 WHERE rolcanlogin = TRUE
 ORDER BY rolname;
+
+-- This is the output
+
+/*  
+
+    rolname     | rolcanlogin
+----------------+-------------
+ dezly_macauley | t
+ kate_kendall   | t
+ postgres       | t
+(3 rows)
+
+*/
 -------------------------------------------------------------------------------
 
 -- SECTION: 2 => Checking which roles do not have a password set 
@@ -85,7 +91,6 @@ WHERE
     rolcanlogin = TRUE
     AND rolpassword IS NULL
 ORDER BY rolname;
-
 -------------------------------------------------------------------------------
 
 -- This shows that the users `dezly_macauley` and `kate_kendall` do
@@ -93,12 +98,10 @@ ORDER BY rolname;
 
 /*
 
-ORDER BY rolname;
     rolname     | rolcanlogin | rolpassword
 ----------------+-------------+-------------
  dezly_macauley | t           |
  kate_kendall   | t           |
-(2 rows)
 
 */
 -------------------------------------------------------------------------------
@@ -112,15 +115,31 @@ ORDER BY rolname;
 */
 -------------------------------------------------------------------------------
 
--- Remember to do the set a password for `kate_kendall` as well
+-- Remember to do the set a password for `kate_kendall` login-role as well
+
+/*
+
+\password kate_kendall
+
+*/
+
 -------------------------------------------------------------------------------
 
 -- If I run the SELECT query again, 
 -- you should see that ther are no login roles that no not have a password
 
+SELECT
+    rolname,
+    rolcanlogin,
+    rolpassword
+FROM pg_authid
+WHERE
+    rolcanlogin = TRUE
+    AND rolpassword IS NULL
+ORDER BY rolname;
+
 /*
 
-ORDER BY rolname;
  rolname | rolcanlogin | rolpassword
 ---------+-------------+-------------
 (0 rows)
@@ -166,13 +185,14 @@ SELECT
     )
 \gexec
 
+-------------------------------------------------------------------------------
+
 SELECT
     format(
         'ALTER ROLE kate_kendall VALID UNTIL %L',
         (current_timestamp + interval '28 days')
     )
 \gexec
-
 -------------------------------------------------------------------------------
 
 -- NOTE: This one is an exception
@@ -180,10 +200,12 @@ SELECT
 -- I've set this to never expire because when the password of a role expires
 -- only the `postgres` superuser role will be able to create a new password
 
--- If the password `postgres` user expires, that'd be bad because no other
--- role in the Postgres cluster has the power to change this.
+-- If the password for the `postgres` login-role expires, 
+-- that'd be bad because no other
+-- login-role in the Postgres cluster has the power to change this.
 
--- However you should still change the `postgres` user password every 28 days
+-- However you should still manually change the `postgres` login-role password 
+-- every 28 days
 ALTER ROLE postgres
 VALID UNTIL 'infinity';
 -------------------------------------------------------------------------------
@@ -200,10 +222,10 @@ ORDER BY rolname;
 
 /*
 
-rolname     |         rolvaliduntil
+    rolname     |         rolvaliduntil
 ----------------+-------------------------------
- dezly_macauley | 2026-12-06 06:28:37.313313+02
- kate_kendall   | 2026-12-06 06:28:48.171252+02
+ dezly_macauley | 2026-12-06 17:54:56.124525+02
+ kate_kendall   | 2026-12-06 17:55:05.479821+02
  postgres       | infinity
 (3 rows)
 
