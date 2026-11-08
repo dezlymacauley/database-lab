@@ -15,6 +15,7 @@ check-status = "mise run check-status"
 connect-admin = "mise run connect-admin"
 connect-query = "mise run connect-query"
 menu = "mise tasks; echo; mise shell-alias ls"
+restore-cluster = "mise run restore-cluster"
 setup-cluster = "mise run setup-cluster"
 toggle-server = "mise run toggle-server"
 #______________________________________________________________________________
