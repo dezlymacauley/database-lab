@@ -153,8 +153,59 @@ ORDER BY rolname;
 */
 -------------------------------------------------------------------------------
 
--- SECTION: 5 => How to set expiry dates for the password
+-- SECTION: 5 => Setting expiry dates for role passwords
 
+-- Now the password for this role will only be valid for 28 days.
+-- I chose 28 days to represent a month because every month 
+-- has at least 28 days
 
+SELECT
+    format(
+        'ALTER ROLE dezly_macauley VALID UNTIL %L',
+        (current_timestamp + interval '28 days')
+    )
+\gexec
 
+SELECT
+    format(
+        'ALTER ROLE kate_kendall VALID UNTIL %L',
+        (current_timestamp + interval '28 days')
+    )
+\gexec
+
+-------------------------------------------------------------------------------
+
+-- NOTE: This one is an exception
+
+-- I've set this to never expire because when the password of a role expires
+-- only the `postgres` superuser role will be able to create a new password
+
+-- If the password `postgres` user expires, that'd be bad because no other
+-- role in the Postgres cluster has the power to change this.
+
+-- However you should still change the `postgres` user password every 28 days
+ALTER ROLE postgres
+VALID UNTIL 'infinity';
+-------------------------------------------------------------------------------
+
+--- Run this query again
+SELECT
+    rolname,
+    rolvaliduntil
+FROM pg_authid
+WHERE rolcanlogin = TRUE
+ORDER BY rolname;
+
+-- You should see that the expiry dates for the password have been set
+
+/*
+
+rolname     |         rolvaliduntil
+----------------+-------------------------------
+ dezly_macauley | 2026-12-06 06:28:37.313313+02
+ kate_kendall   | 2026-12-06 06:28:48.171252+02
+ postgres       | infinity
+(3 rows)
+
+*/
 -------------------------------------------------------------------------------
