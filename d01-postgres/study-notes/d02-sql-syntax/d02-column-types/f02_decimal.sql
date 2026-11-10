@@ -28,12 +28,12 @@ CREATE TABLE study_notes.example_table (
 -- E.g. 
 -- Take this number: `18.621` 
 
--- Precision means the total number of digits the number has:
+-- Precision means the total number of digits the number is allowed to
+-- have is 5. The number can have less than 5 total digits.
 -- So this number has 5 digits.
 
 -- Scale means the number of digits after the decimal point:
 -- So this number has 3 digits.
-
 -------------------------------------------------------------------------------
 
 -- This insert will succeed
@@ -48,64 +48,78 @@ VALUES
 -- This will fail because the precision of the interest_rate column was set
 -- to 5 digits, and this value has a total of 6 digits
 (718.621);
+
+-- It will be stored as:
+-- 718.621
 -------------------------------------------------------------------------------
 
 -- This insert will succeed
-INSERT INTO example_table (interest_rate)
+INSERT INTO study_notes.example_table (interest_rate)
 VALUES
 -- The precision was set to 5
+-- This value has a total of 5 digits 
 
--- This value will be stored because it is 5 digits 
--- However this number 4 digits
--- However the decimals will be rounded to 3 decimals
+-- The scale was set to 3
+-- This number has a total of 4 digits after the decimal point
+-- So it will be rounded down to 3 decimal places before being stored.
 (5.6472);
 
--- This number will be stored as 5.647
+-- It will be stored as:
+-- 5.647
 -------------------------------------------------------------------------------
 
-
--- This will work because it is a total of 5 digits but the decimals 
--- will be rounded up.
---
-INSERT INTO financial_info (description, interest_rate)
+-- This insert will succeed
+INSERT INTO study_notes.example_table (interest_rate)
 VALUES
--- The precision was set to 5, and the scale was set to 3 
--- This value will be stored because it is 5 digits 
--- However the decimals will be rounded to 3 decimals
-('This will be rounded up', 5.6475);
---
--- This number will be stored as 5.648
---
--- _______________________________________________________________________________
---
--- This will work.
--- Postgres will add some extra zeros add that end to keep the scale consistent.
-INSERT INTO financial_info (description, interest_rate)
+
+-- The precision was set to 5
+-- This value has a total of 5 digits 
+
+-- The scale was set to 3
+-- This number has a total of 4 digits after the decimal point
+-- So it will be rounded up to 3 decimal places before being stored.
+(5.6475);
+
+-- It will be stored as:
+-- 5.648
+-------------------------------------------------------------------------------
+
+-- This insert wil succeed.
+INSERT INTO study_notes.example_table (interest_rate)
 VALUES
-('Less than five digits', 3.1);
---
--- The number will be stored as 3.100 
+-- Postgres will add some extra zeros add the end to ensure that the total
+-- number of digits after the decimal matches the `scale` (which was set
+-- to 3)
+(6.1);
 
--- _______________________________________________________________________________
+-- It will be stored as:
+-- 6.100 
+-------------------------------------------------------------------------------
 
--- This will work. Postgres will add the decimal and the extra zeros.
-INSERT INTO financial_info (description, interest_rate)
+-- This will work. 
+INSERT INTO study_notes.example_table (interest_rate)
 VALUES
-('Whole number', 12);
---
--- 12.000.
+(12);
 
--- _______________________________________________________________________________
+-- It will be stored as:
+-- 12.000
+-------------------------------------------------------------------------------
 
--- select * from financial_info;
--- +---------------------------+---------------+
--- | description               | interest_rate |
--- |---------------------------+---------------|
--- | normal example            | 18.621        |
--- | This will be rounded down | 5.647         |
--- | This will be rounded up   | 5.648         |
--- | Less than five digits     | 3.100         |
--- | Whole number              | 12.000        |
--- +---------------------------+---------------+
+SELECT interest_rate FROM study_notes.example_table;
 
--- _______________________________________________________________________________
+/*
+
++---------------+
+| interest_rate |
+|---------------|
+| 18.621        |
+|  5.647        |
+|  5.648        |
+|  6.100        |
++---------------+
+
+*/
+-------------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS study_notes.example_table;
+-------------------------------------------------------------------------------
