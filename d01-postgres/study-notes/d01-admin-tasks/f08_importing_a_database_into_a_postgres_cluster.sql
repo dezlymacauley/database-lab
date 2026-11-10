@@ -46,7 +46,7 @@
 -- Then create an empty database that will store the contents 
 -- of the database file
 
-CREATE DATABASE example_database.sql
+CREATE DATABASE example_database;
 -------------------------------------------------------------------------------
 
 -- Connect to the empty database
