@@ -1,5 +1,5 @@
 /*
-    ABOUT: Confirming the size in bytes of a column type
+    ABOUT: Confirming the size (in bytes) of a column type
 */
 -------------------------------------------------------------------------------
 SELECT
