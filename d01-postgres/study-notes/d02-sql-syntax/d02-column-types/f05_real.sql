@@ -1,6 +1,6 @@
 /*
 
-    ABOUT: Floating points (real or is it double)
+    ABOUT: Real
 
     Use case:
     1. You want to store a value that has decimals.
@@ -15,6 +15,15 @@
     In simple terms, do not use this to store financial data because every
     decimal in financial data needs to be stored with a high level 
     of precision.
+
+    4. This is the least precise of the data types that store numbers with
+    a decimal part. The first 6 digits after the decimal point 
+    will be accurate.
+
+    If you want more accuracy, use `double`. The first 15 digits after the
+    decimal point will be accurate.
+
+    If you wnat maximum accuracy, use `decimal` aka `numeric`
 */
 -------------------------------------------------------------------------------
 
