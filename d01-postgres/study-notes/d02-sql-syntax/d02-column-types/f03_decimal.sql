@@ -1,6 +1,6 @@
 /*
 
-    ABOUT: Decimal
+    ABOUT: Decimal (aka Numeric)
 
     This is for numbers that have decimals, 
     and you want a high level of precision for the decimals stored. 

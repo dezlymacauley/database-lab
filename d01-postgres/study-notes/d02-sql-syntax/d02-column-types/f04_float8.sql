@@ -1,6 +1,6 @@
 /*
 
-    ABOUT: Floating points (real or is it double)
+    ABOUT: Float8 (aka double precision)
 
     Use case:
     1. You want to store a value that has decimals.

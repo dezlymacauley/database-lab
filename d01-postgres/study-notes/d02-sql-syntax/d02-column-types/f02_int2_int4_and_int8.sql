@@ -1,5 +1,7 @@
 /*
-    ABOUT: Integers
+    ABOUT: INT2, INT4, and INT8
+
+    Use these when you want to store numbers that do not have any decimals.
 
     These are the integer types in Postgres:
 

@@ -1,6 +1,6 @@
 /*
 
-    ABOUT: Real
+    ABOUT: Float4 (aka real)
 
     Use case:
     1. You want to store a value that has decimals.
