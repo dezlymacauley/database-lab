@@ -47,5 +47,20 @@ FROM study_notes.example_table;
 
 /*
 
++-----------+-----------+
+| user_name | is_online |
+|-----------+-----------|
+| Dave      | True      |
+| Ken       | False     |
+| Lee       | True      |
+| Jin       | False     |
+| Max       | True      |
+| Jane      | False     |
+| Gojo      | True      |
+| Bruce     | False     |
+| Lee       | False     |
+| Kate      | True      |
++-----------+-----------+
+
 */
 -------------------------------------------------------------------------------
