@@ -2,134 +2,60 @@
 
     ABOUT: Float4 (aka real)
 
+    `float4` uses 4 bytes of storage and provides approximately
+    6 decimal digits of precision.
+
     Use case:
-    1. You want to store a value that has decimals.
+    1. You want to store a numerical value that has decimals.
 
-    2. You want to store it in a column that is more performant 
-    than the `decimal` column type (aka the numeric column type).
+    2. You want floating-point arithmetic, which is generally faster than
+       working with `numeric` values.
 
-    3. You are willing to accept the trade off, which is a loss in precision. 
-    In simple terms don't use this column type to store values with lots of
-    decimals and each of those decimals has to be stored accurately.
+    3. You are willing to accept the trade-off of approximate precision.
+       In simple terms, the stored value might not exactly match the
+       decimal value you originally provided.
 
-    In simple terms, do not use this to store financial data because every
-    decimal in financial data needs to be stored with a high level 
-    of precision.
-
-    4. This is the least precise of the data types that store numbers with
-    a decimal part. The first 6 digits after the decimal point 
-    will be accurate.
-
-    If you want more accuracy, use `double`. The first 15 digits after the
-    decimal point will be accurate.
-
-    If you wnat maximum accuracy, use `decimal` aka `numeric`
+    4. Do not use this column type to store financial data when exact
+       decimal representation is required. Use `numeric` (aka `decimal`)
+       instead.
 */
 -------------------------------------------------------------------------------
 
 CREATE TABLE study_notes.example_table (
-
-    -- NOTE: precision and scale
-
-    -- The first number in the brackets is the precision
-    -- The second number is the scale
-    interest_rate NUMERIC(5, 3)
+    interest_rate FLOAT4
 );
 -------------------------------------------------------------------------------
 
--- NOTE: What are `precision` and `scale`?
+-- NOTE: Unlike NUMERIC, FLOAT4 does not allow you to specify precision
+-- and scale.
 
--- E.g. 
--- Take this number: `18.621` 
+-- PostgreSQL uses binary floating-point representation.
+-- This means some decimal values cannot be represented exactly.
 
--- Precision means the total number of digits the number is allowed to
--- have is 5. The number can have less than 5 total digits.
--- So this number has 5 digits.
-
--- Scale means the number of digits after the decimal point:
--- So this number has 3 digits.
--------------------------------------------------------------------------------
-
--- This insert will succeed
 INSERT INTO study_notes.example_table (interest_rate)
 VALUES
-(18.621);
--------------------------------------------------------------------------------
-
--- This insert will fail
-INSERT INTO study_notes.example_table (interest_rate)
-VALUES
--- This will fail because the precision of the interest_rate column was set
--- to 5 digits, and this value has a total of 6 digits
-(718.621);
-
--- It will be stored as:
--- 718.621
--------------------------------------------------------------------------------
-
--- This insert will succeed
-INSERT INTO study_notes.example_table (interest_rate)
-VALUES
--- The precision was set to 5
--- This value has a total of 5 digits 
-
--- The scale was set to 3
--- This number has a total of 4 digits after the decimal point
--- So it will be rounded down to 3 decimal places before being stored.
-(5.6472);
-
--- It will be stored as:
--- 5.647
--------------------------------------------------------------------------------
-
--- This insert will succeed
-INSERT INTO study_notes.example_table (interest_rate)
-VALUES
-
--- The precision was set to 5
--- This value has a total of 5 digits 
-
--- The scale was set to 3
--- This number has a total of 4 digits after the decimal point
--- So it will be rounded up to 3 decimal places before being stored.
-(5.6475);
-
--- It will be stored as:
--- 5.648
--------------------------------------------------------------------------------
-
--- This insert wil succeed.
-INSERT INTO study_notes.example_table (interest_rate)
-VALUES
--- Postgres will add some extra zeros add the end to ensure that the total
--- number of digits after the decimal matches the `scale` (which was set
--- to 3)
-(6.1);
-
--- It will be stored as:
--- 6.100 
--------------------------------------------------------------------------------
-
--- This will work. 
-INSERT INTO study_notes.example_table (interest_rate)
-VALUES
+(18.621),
+(718.621),
+(5.6472),
+(5.6475),
+(6.1),
 (12);
-
--- It will be stored as:
--- 12.000
 -------------------------------------------------------------------------------
 
-SELECT interest_rate FROM study_notes.example_table;
+SELECT interest_rate
+FROM study_notes.example_table;
 
 /*
 
 +---------------+
 | interest_rate |
 |---------------|
-| 18.621        |
-|  5.647        |
-|  5.648        |
-|  6.100        |
+|  18.621       |
+| 718.621       |
+|   5.6472      |
+|   5.6475      |
+|   6.1         |
+|  12.0         |
 +---------------+
 
 */
