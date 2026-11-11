@@ -23,8 +23,20 @@ SELECT
 
 -- SECTION: 2 => Storing a number value has decimals
 
+SELECT
+    pg_column_size(1.5::FLOAT4) AS float4_aka_real,
+    pg_column_size(1.5::FLOAT8) AS float8_aka_double_precision,
+    pg_column_size(1.5::DECIMAL) AS decimal_aka_numeric;
 
+/*
 
++-----------------+-----------------------------+---------------------+
+| float4_aka_real | float8_aka_double_precision | decimal_aka_numeric |
+|-----------------+-----------------------------+---------------------|
+| 4               | 8                           | 10                  |
++-----------------+-----------------------------+---------------------+
+
+*/
 -------------------------------------------------------------------------------
 
 -- SECTION: 3 => Storing a `true` or `false` value
