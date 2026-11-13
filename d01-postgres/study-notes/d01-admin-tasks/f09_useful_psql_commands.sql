@@ -35,10 +35,19 @@
 -- Connect to a database
 -------------------------------------------------------------------------------
 
--- \d
--- List the tables in the database that you are currently connected to
--------------------------------------------------------------------------------
+-- \d name_of_schema.*
+-- List the tables in the database schema of the database 
+-- that you are currently connected to
 
--- \d name_of_database
--- List the columns of a specific table
+-- E.g. If you wanted to see a list of all of the tables in 
+-- the `study_notes` database schema of the database `postgres_lab`,
+-- do this:
+
+/*
+
+\c postgres_lab
+
+\d study_notes.*
+
+*/
 -------------------------------------------------------------------------------

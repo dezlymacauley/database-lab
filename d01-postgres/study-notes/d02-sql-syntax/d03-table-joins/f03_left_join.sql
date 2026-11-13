@@ -4,260 +4,298 @@
     A `LEFT JOIN` is a type of table JOIN in SQL.
 
     The way it works is simple:
-    1. You make a query with a condition that targets a column that is shared
-    by multiple tables.
 
-    2. Postgres will show ALL rows from the LEFT table, including rows
-    that do not have a match in the RIGHT table.
+    1. You select a LEFT table and a RIGHT table.
 
-    3. If there is no matching row in the RIGHT table, Postgres
-    will return NULL values for the columns belonging to that table.
+    2. PostgreSQL matches rows between the two tables using
+    a condition specified with the `ON` keyword.
+
+    3. PostgreSQL returns ALL rows from the LEFT table,
+    including rows that do not have a match in the RIGHT table.
+
+    4. If there is no matching row in the RIGHT table,
+    PostgreSQL returns NULL values for its columns.
+
+    In this example, an online store wants to generate a monthly
+    sales report showing every product and its orders.
+
+    Products that haven't been ordered during the month
+    must also appear in the report.
 */
 -------------------------------------------------------------------------------
 
--- STEP: 1 => Create tables that have a shared column
+-- STEP 1: Setting up the data
 
--- This table stores the all of products available for sale
+-- Each row stores the details of a registered customer.
+CREATE TABLE study_notes.customers (
+    customer_id INT PRIMARY KEY,
+    customer_name TEXT
+);
+
+-- Each row stores the details of a product sold by the store.
 CREATE TABLE study_notes.products (
     product_id INT PRIMARY KEY,
     product_name TEXT,
     price DECIMAL(10, 2)
 );
 
--- This table stores details of a custom order for a specific product
-CREATE TABLE study_notes.items_in_order (
+-- Each row stores an order placed by a customer.
+CREATE TABLE study_notes.orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT REFERENCES study_notes.customers(customer_id),
+    order_date DATE
+);
+
+-- Each row stores an individual product included in an order.
+CREATE TABLE study_notes.order_items (
     order_item_id INT PRIMARY KEY,
+    order_id INT REFERENCES study_notes.orders(order_id),
     product_id INT REFERENCES study_notes.products(product_id),
     quantity INT
 );
 -------------------------------------------------------------------------------
 
--- NOTE: Both of these tables share the column `product_id`
+/*
+    NOTE: WHY DO WE HAVE FOUR TABLES?
 
--- The declaration below establishes the relationship
--- product_id INT REFERENCES study_notes.products(product_id),
+    A customer can place multiple orders.
 
--- A `LEFT JOIN` will return all rows from the LEFT table,
--- even when there is no matching `product_id` value in the RIGHT table.
+    An order can contain multiple products.
+
+    A product can appear in multiple orders.
+
+    The `order_items` table connects individual products
+    to the orders they belong to.
+
+    For example, one order might contain:
+    - 2 Wireless Mice
+    - 1 Mechanical Keyboard
+    - 3 USB-C Hubs
+
+    Each of these products gets its own row in `order_items`.
+
+    This allows an order to contain multiple products without
+    repeating the order's details for every product.
+*/
 -------------------------------------------------------------------------------
 
--- STEP: 2 => Insert data into both tables
+-- STEP 2: Insert example data
 
--- Adding some example data to the `products` table
+INSERT INTO study_notes.customers (
+    customer_id,
+    customer_name
+)
+VALUES
+(1, 'Oliver'),
+(2, 'Charlotte'),
+(3, 'Harry');
+
 INSERT INTO study_notes.products (
     product_id,
     product_name,
     price
 )
 VALUES
-(1, 'Laptop', 1200.00),
-(2, 'Keyboard', 80.00),
-(3, 'Mouse', 35.00),
-(4, 'Monitor', 350.00),
-(5, 'Webcam', 65.00);
--------------------------------------------------------------------------------
+(1, 'Wireless Mouse', 25.00),
+(2, 'Mechanical Keyboard', 89.99),
+(3, 'USB-C Hub', 45.00),
+(4, 'Laptop Stand', 35.00),
+(5, 'Webcam', 59.99),
+(6, 'Monitor', 199.99);
 
--- Adding some example data to the `order_items` table
-INSERT INTO study_notes.items_in_order (
+INSERT INTO study_notes.orders (
+    order_id,
+    customer_id,
+    order_date
+)
+VALUES
+(101, 1, '2026-11-02'),
+(102, 2, '2026-11-08'),
+(103, 3, '2026-10-28'),
+(104, 1, '2026-11-15'),
+(105, 2, '2026-11-21'),
+(106, 3, '2026-12-02');
+
+INSERT INTO study_notes.order_items (
     order_item_id,
+    order_id,
     product_id,
     quantity
 )
 VALUES
-(101, 1, 2),
-(102, 2, 3),
-(103, 1, 1),
-(104, 4, 2),
-(105, 2, 1);
--------------------------------------------------------------------------------
+-- Order 101: Oliver
+(1, 101, 1, 2),
+(2, 101, 2, 1),
+(3, 101, 3, 3),
 
--- Inspect the tables
+-- Order 102: Charlotte
+(4, 102, 1, 1),
+(5, 102, 5, 1),
 
-SELECT
-    product_id,
-    product_name,
-    price
-FROM study_notes.products;
+-- Order 103: Harry (October)
+(6, 103, 3, 3),
 
-SELECT
-    order_item_id,
-    product_id,
-    quantity
-FROM study_notes.order_items;
+-- Order 104: Oliver
+(7, 104, 1, 1),
+(8, 104, 4, 1),
 
--- For the sake of this example, let's say that these are monthly results.
+-- Order 105: Charlotte
+(9, 105, 2, 2),
+(10, 105, 4, 1),
 
-/*
-
-+------------+--------------+---------+
-| product_id | product_name | price   |
-|------------+--------------+---------|
-| 1          | Laptop       | 1200.00 |
-| 2          | Keyboard     |   80.00 |
-| 3          | Mouse        |   35.00 |
-| 4          | Monitor      |  350.00 |
-| 5          | Webcam       |   65.00 |
-+------------+--------------+---------+
-
-+---------------+------------+----------+
-| order_item_id | product_id | quantity |
-|---------------+------------+----------|
-| 101           | 1          | 2        |
-| 102           | 2          | 3        |
-| 103           | 1          | 1        |
-| 104           | 4          | 2        |
-| 105           | 2          | 1        |
-+---------------+------------+----------+
-
-*/
--------------------------------------------------------------------------------
-
--- EXAMPLE: => 
-
--- I want to find all products that do not appear in the `order_items` table
--- In simple terms, products that have never been sold this month.
-
--- Both the `products` table and the `order_items` table have less than
--- 10 rows of data, so it's easy to see that the product id 3 (mouse),
--- and product id 3
-
+-- Order 106: Harry (December)
+(11, 106, 5, 2);
 -------------------------------------------------------------------------------
 
 /*
-    EXAMPLE: 1
+    NOTE:
 
+    The example data contains several different situations:
 
-    The online store wants to identify products that have not
-    appeared in any customer orders.
+    1. Wireless Mouse: Ordered multiple times during November.
 
-    This information can help the store identify products
-    that may need better marketing or promotion.
+    2. Mechanical Keyboard: Ordered more than once during November.
+
+    3. USB-C Hub: Ordered in October, but not during November.
+
+    4. Laptop Stand: Ordered twice during November.
+
+    5. Webcam: Ordered during November and December.
+
+    6. Monitor: Has never been ordered.
+
+    We want ALL six products to appear in our November report,
+    regardless of whether they have matching orders.
 */
-
--- First select the columns that you want to show from both tables
-SELECT
-    -- Columns from the `products` table
-    products.product_id,
-    products.product_name,
-    products.price,
-
-    -- Columns from the `order_items` table
-    order_items.order_item_id,
-    order_items.quantity
-
--- The keyword `FROM` is followed by the name of the table
--- that contains ALL the records we want to check.
-FROM study_notes.products
-
--- The `LEFT JOIN` keyword is followed by the name of the table
--- that contains the additional information we want to retrieve.
-    LEFT JOIN study_notes.order_items
-
-    -- The `ON` keyword is followed by specifying the column
-    -- that both tables share.
-        ON products.product_id = order_items.product_id
-
--- The WHERE clause filters the results to only include products
--- that do not have a matching order_item_id.
-WHERE order_items.order_item_id IS NULL;
 -------------------------------------------------------------------------------
 
 /*
+    EXAMPLE: FINDING ALL PRODUCTS AND THEIR NOVEMBER ORDERS
 
-+------------+--------------+-------+---------------+----------+
-| product_id | product_name | price | order_item_id | quantity |
-|------------+--------------+-------+---------------+----------|
-| 5          | Webcam       | 65.00 | <null>        | <null>   |
-| 3          | Mouse        | 35.00 | <null>        | <null>   |
-+------------+--------------+-------+---------------+----------+
+    The online store wants a monthly sales report showing
+    every product alongside its orders placed during November 2026.
 
-*/
--------------------------------------------------------------------------------
+    Products that haven't been ordered during November
+    must also appear.
 
+    First, we retrieve the order items belonging to orders
+    placed during November.
 
-
-
--------------------------------------------------------------------------------
-
-    IMPORTANT:
-
-    The products with a `product_id` of 3 and 5 appear in the results.
-
-    This is because these products exist in the `products` table,
-    but do not have a matching `product_id` in the `order_items` table.
-
-    The `LEFT JOIN` includes all products, even when they have
-    no matching order items.
-
-    Since the Mouse and Webcam have never appeared in an order,
-    the columns belonging to the `order_items` table contain NULL values.
-
-    The WHERE clause filters the results to only include
-    products whose `order_item_id` contains a NULL value.
-
-
--------------------------------------------------------------------------------
-
-/*
-    EXAMPLE 2: FINDING ALL PRODUCTS AND THEIR SALES INFORMATION
-
-    I want to see ALL products available in the online store,
-    including products that have never been sold.
-
-    I also want to see how many units of each product were included
-    in customer orders whenever that information is available.
-
-    The ORDER BY clause sorts the results by product_id.
+    Then, we use a LEFT JOIN to match those order items
+    against ALL the products in the store.
 */
 
+-- STEP 1: Retrieve order items belonging to November orders.
+WITH november_order_items AS (
+    SELECT
+        order_items.product_id,
+        orders.order_id,
+        orders.order_date,
+        order_items.quantity
+    FROM study_notes.order_items
+        INNER JOIN study_notes.orders
+            ON order_items.order_id = orders.order_id
+    WHERE
+        orders.order_date >= '2026-11-01'
+        AND orders.order_date < '2026-12-01'
+)
+
+-- STEP 2: Match the November order items against ALL products.
 SELECT
     products.product_id,
     products.product_name,
     products.price,
-    order_items.order_item_id,
-    order_items.quantity
+    november_order_items.order_id,
+    november_order_items.order_date,
+    november_order_items.quantity
 FROM study_notes.products
-    LEFT JOIN study_notes.order_items
-        ON products.product_id = order_items.product_id
-ORDER BY products.product_id;
+    LEFT JOIN november_order_items
+        ON products.product_id = november_order_items.product_id
+ORDER BY
+    products.product_id,
+    november_order_items.order_id;
 -------------------------------------------------------------------------------
 
 /*
     EXPECTED OUTPUT:
 
-    +------------+--------------+---------+---------------+----------+
-    | product_id | product_name | price   | order_item_id | quantity |
-    |------------+--------------+---------+---------------+----------|
-    | 1          | Laptop       | 1200.00 | 101           | 2        |
-    | 1          | Laptop       | 1200.00 | 103           | 1        |
-    | 2          | Keyboard     | 80.00   | 102           | 3        |
-    | 2          | Keyboard     | 80.00   | 105           | 1        |
-    | 3          | Mouse        | 35.00   | NULL          | NULL     |
-    | 4          | Monitor      | 350.00  | 104           | 2        |
-    | 5          | Webcam       | 65.00   | NULL          | NULL     |
-    +------------+--------------+---------+---------------+----------+
+    +------------+---------------------+--------+----------+------------+----------+
+    | product_id | product_name        | price  | order_id | order_date | quantity |
+    |------------+---------------------+--------+----------+------------+----------|
+    | 1          | Wireless Mouse      | 25.00  | 101      | 2026-11-02 | 2        |
+    | 1          | Wireless Mouse      | 25.00  | 102      | 2026-11-08 | 1        |
+    | 1          | Wireless Mouse      | 25.00  | 104      | 2026-11-15 | 1        |
+    | 2          | Mechanical Keyboard | 89.99  | 101      | 2026-11-02 | 1        |
+    | 2          | Mechanical Keyboard | 89.99  | 105      | 2026-11-21 | 2        |
+    | 3          | USB-C Hub           | 45.00  | NULL     | NULL       | NULL     |
+    | 4          | Laptop Stand        | 35.00  | 104      | 2026-11-15 | 1        |
+    | 4          | Laptop Stand        | 35.00  | 105      | 2026-11-21 | 1        |
+    | 5          | Webcam              | 59.99  | 102      | 2026-11-08 | 1        |
+    | 6          | Monitor             | 199.99 | NULL     | NULL       | NULL     |
+    +------------+---------------------+--------+----------+------------+----------+
 
     ---------------------------------------------------------------------------
 
     IMPORTANT:
 
-    Every product appears in the results, including the Mouse
-    and Webcam, which have never been sold.
+    1. Every product appears in the results.
 
-    Products can appear more than once if they have multiple
-    matching records in the `order_items` table.
+    This includes the USB-C Hub and Monitor.
 
-    For example, the Laptop appears twice because it has two
-    matching order items.
+    The USB-C Hub has an order from October, but no orders
+    during November.
 
-    A LEFT JOIN does not automatically combine or aggregate
-    matching rows into a single row.
+    The Monitor has never been ordered.
 
-    It returns a row for each matching combination.
+    2. Products can appear more than once.
+
+    The Wireless Mouse appears three times because it was
+    included in three different November orders.
+
+    The Mechanical Keyboard appears twice because it was
+    included in two different November orders.
+
+    3. Orders from outside November are excluded.
+
+    Harry's October order and December order do not appear
+    in the November report.
+
+    4. Missing order information is represented by NULL.
+
+    The USB-C Hub and Monitor have no matching November
+    order items, so PostgreSQL returns NULL for those columns.
+
+    5. The LEFT JOIN is responsible for preserving every product.
+
+    Even when a product has no matching November order items,
+    it remains in the results.
+
+    ---------------------------------------------------------------------------
+
+    IMPORTANT: UNDERSTANDING THE QUERY
+
+    The `november_order_items` CTE retrieves order items
+    belonging to orders placed during November.
+
+    The INNER JOIN inside the CTE connects each order item
+    to its corresponding order so that we can check the order date.
+
+    The LEFT JOIN then matches those November order items
+    against the products table.
+
+    Notice that `products` is the LEFT table.
+
+    This means PostgreSQL preserves every product, even when
+    the CTE contains no matching November order items.
+
+    This is the main purpose of the LEFT JOIN in this example.
 */
 -------------------------------------------------------------------------------
 
--- Removing the example tables
+-- STEP 3: Remove the example tables
+
 DROP TABLE IF EXISTS study_notes.order_items;
+DROP TABLE IF EXISTS study_notes.orders;
 DROP TABLE IF EXISTS study_notes.products;
+DROP TABLE IF EXISTS study_notes.customers;
 -------------------------------------------------------------------------------
