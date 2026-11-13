@@ -68,13 +68,13 @@ INSERT INTO study_notes.orders (
     order_date
 )
 VALUES
-(101, 1, 150.50, '2024-11-01'),
-(102, 2, 89.99, '2024-11-02'),
-(103, 1, 200.00, '2024-11-03'),
-(104, 3, 45.75, '2024-11-04'),
-(105, 2, 120.25, '2024-11-05'),
-(106, 4, 300.00, '2024-11-06'),
-(107, 1, 75.50, '2024-11-07');
+(101, 1, 150.50, '2026-11-01'),
+(102, 2, 89.99, '2026-11-02'),
+(103, 1, 200.00, '2026-11-03'),
+(104, 3, 45.75, '2026-11-04'),
+(105, 2, 120.25, '2026-11-05'),
+(106, 4, 300.00, '2026-11-06'),
+(107, 1, 75.50, '2026-11-07');
 -------------------------------------------------------------------------------
 
 /*
@@ -89,18 +89,33 @@ VALUES
 SELECT
     -- Columns from the `customers` table
     customers.customer_id,
-    customers.name,
+    customers.customer_name,
 
     -- Columns from the `orders` table
     orders.order_id,
     orders.order_date,
     orders.total_amount
--- Then specify the table that is the owner of the values from the shared
--- column. 
--- E.g. The table `study_notes.customers` is the orginal owner
+
+-- The keyword `FROM` is followed by name of the table that is the owner 
+-- of the values from the shared column. 
+
+-- E.g. If you check how the two tables were created,
+-- the table `study_notes.customers` is the owner of the column
+-- `customer_id`, 
+-- The table `study_notes.orders` only has the `customer_id` column
+-- as a reference.
 FROM study_notes.customers
+
+-- The `INNER JOIN` keyword is followed by the name of the table that
+    -- has a reference to the shared column.
     INNER JOIN study_notes.orders
+
+    -- The `ON` keyword is followed by specifying the column
+    -- that both tables share.
         ON customers.customer_id = orders.customer_id
+
+-- And finally order the results from the highest total_amount,
+-- to the lowest total_amount, and only show 4 rows of results.
 ORDER BY orders.total_amount DESC
 LIMIT 4;
 -------------------------------------------------------------------------------
@@ -161,22 +176,20 @@ ORDER BY orders.total_amount DESC;
 -------------------------------------------------------------------------------
 
 /*
-    EXPECTED OUTPUT:
 
-    +-------------+---------------+----------+------------+--------------+
-    | customer_id | name          | order_id | order_date | total_amount |
-    |-------------+---------------+----------+------------+--------------|
-    | 1           | Alice Johnson | 103      | 2024-11-03 | 200.00       |
-    | 1           | Alice Johnson | 101      | 2024-11-01 | 150.50       |
-    | 1           | Alice Johnson | 107      | 2024-11-07 | 75.50        |
-    +-------------+---------------+----------+------------+--------------+
++-------------+---------------+----------+------------+--------------+
+| customer_id | customer_name | order_id | order_date | total_amount |
+|-------------+---------------+----------+------------+--------------|
+| 4           | David Brown   | 106      | 2026-11-06 | 300.00       |
+| 1           | Alice Johnson | 103      | 2026-11-03 | 200.00       |
+| 1           | Alice Johnson | 101      | 2026-11-01 | 150.50       |
+| 2           | Bob Smith     | 105      | 2026-11-05 | 120.25       |
++-------------+---------------+----------+------------+--------------+
+
 */
-
 -------------------------------------------------------------------------------
 
 -- Removing the example tables
-
 DROP TABLE IF EXISTS study_notes.orders;
 DROP TABLE IF EXISTS study_notes.customers;
-
 -------------------------------------------------------------------------------
