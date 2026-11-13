@@ -1,20 +1,22 @@
 /*
     ABOUT: INNER JOIN
 
-    An INNER JOIN is used to combine rows from two or more tables
-    when there is a matching value between the specified columns.
+    An `INNER JOIN` is the default type of table JOIN in SQL.
 
-    Only rows that have a match in both tables will be returned.
+    Postgres will perform this type of table JOIN if you don't specify
+    what type of table join should be used.
 
-    The columns being compared do not necessarily need to have
-    the same name, but their values must be compatible.
+    The way it works is simple:
+    1. You make a query with a condition that targets a column that is shared
+    by multiple tables.
+
+    2. Postgres will show the only the rows that have a match in both tables.
 */
-
 -------------------------------------------------------------------------------
 
--- STEP: 1 => Creating both tables
+-- STEP: 1 => Create tables that have a shared column
 
--- This table stores the information of each customer
+-- This table stores the registration information of each customer
 CREATE TABLE study_notes.customers (
     customer_id INT PRIMARY KEY,
     customer_name TEXT,
@@ -41,12 +43,12 @@ CREATE TABLE study_notes.orders (
 
 -------------------------------------------------------------------------------
 
--- STEP: 2 => Inserting data into both tables 
+-- STEP: 2 => Insert data into both tables 
 
 -- Adding some example data to the `orders` table
 INSERT INTO study_notes.customers (
     customer_id,
-    name,
+    customer_name,
     email,
     address
 )
@@ -56,7 +58,6 @@ VALUES
 (3, 'Carol White', 'carol@email.com', '789 Pine Rd'),
 (4, 'David Brown', 'david@email.com', '321 Elm St'),
 (5, 'Eve Davis', 'eve@email.com', '654 Birch Ln');
-
 -------------------------------------------------------------------------------
 
 -- Adding some example data to the `orders` table
@@ -74,27 +75,34 @@ VALUES
 (105, 2, 120.25, '2024-11-05'),
 (106, 4, 300.00, '2024-11-06'),
 (107, 1, 75.50, '2024-11-07');
-
 -------------------------------------------------------------------------------
 
 /*
-    EXAMPLE: 1 => I want to see the top 4 most expensive orders,
+    EXAMPLE: 1 
+
+    I want to see the top 4 most expensive orders,
     and I want to know which customers made each of those orders.
 
 */
 
+-- First select the columns that you want to show from tables
 SELECT
+    -- Columns from the `customers` table
     customers.customer_id,
     customers.name,
+
+    -- Columns from the `orders` table
     orders.order_id,
     orders.order_date,
     orders.total_amount
-FROM study_notes.customers AS customers
-    INNER JOIN study_notes.orders AS orders
+-- Then specify the table that is the owner of the values from the shared
+-- column. 
+-- E.g. The table `study_notes.customers` is the orginal owner
+FROM study_notes.customers
+    INNER JOIN study_notes.orders
         ON customers.customer_id = orders.customer_id
 ORDER BY orders.total_amount DESC
 LIMIT 4;
-
 -------------------------------------------------------------------------------
 
 /*
