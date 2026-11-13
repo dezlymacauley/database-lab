@@ -40,7 +40,6 @@ CREATE TABLE study_notes.orders (
 
 -- An `INNER JOIN` will only return rows where there is a matching
 -- `customer_id` value in both tables.
-
 -------------------------------------------------------------------------------
 
 -- STEP: 2 => Insert data into both tables 
@@ -145,7 +144,6 @@ LIMIT 4;
 
     An INNER JOIN excludes rows that do not have a match in both tables.
 */
-
 -------------------------------------------------------------------------------
 
 /*
@@ -172,7 +170,6 @@ FROM study_notes.customers AS customers
         ON customers.customer_id = orders.customer_id
 WHERE customers.customer_id = 1
 ORDER BY orders.total_amount DESC;
-
 -------------------------------------------------------------------------------
 
 /*
