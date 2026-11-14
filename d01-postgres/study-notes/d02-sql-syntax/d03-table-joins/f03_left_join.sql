@@ -26,12 +26,15 @@
 
 -- STEP: 1 => Create the table
 
+-------------------------------------------------------------------------------
+
 -- Each row stores the details of a registered customer.
 CREATE TABLE study_notes.customers (
     customer_id INT PRIMARY KEY,
     customer_name TEXT,
     email TEXT
 );
+-------------------------------------------------------------------------------
 
 -- Each row stores the details of a product that can be 
 -- bought from the business.
@@ -40,6 +43,7 @@ CREATE TABLE study_notes.products (
     product_name TEXT,
     price DECIMAL(10, 2)
 );
+-------------------------------------------------------------------------------
 
 -- Each row stores an order placed by a customer.
 -- Each order can be made up of a single item,
@@ -54,6 +58,7 @@ CREATE TABLE study_notes.orders (
     order_date DATE,
     customer_id INT REFERENCES study_notes.customers(customer_id)
 );
+-------------------------------------------------------------------------------
 
 -- Each row stores the details of each individual product that was ordered.
 -- This table shares a relationship with:
@@ -91,6 +96,8 @@ CREATE TABLE study_notes.order_items (
 
 -- STEP: 2 => Add the data for each table
 
+-------------------------------------------------------------------------------
+
 INSERT INTO study_notes.customers (
     customer_id,
     customer_name,
@@ -100,6 +107,7 @@ VALUES
 (1, 'Oliver', 'oliver@gmail.com'),
 (2, 'Charlotte', 'charlotte@gmail.com'),
 (3, 'Harry', 'harry@gmail.com');
+-------------------------------------------------------------------------------
 
 INSERT INTO study_notes.products (
     product_id,
@@ -113,49 +121,120 @@ VALUES
 (4, 'Laptop Stand', 35.00),
 (5, 'Webcam', 59.99),
 (6, 'Monitor', 199.99);
+-------------------------------------------------------------------------------
 
 INSERT INTO study_notes.orders (
     order_id,
-    customer_id,
-    order_date
+    order_date,
+    customer_id
 )
 VALUES
-(101, 1, '2026-11-02'),
-(102, 2, '2026-11-08'),
-(103, 3, '2026-10-28'),
-(104, 1, '2026-11-15'),
-(105, 2, '2026-11-21'),
-(106, 3, '2026-12-02');
+(101, '2026-11-02', 1),
+(102, '2026-11-08', 2),
+(103, '2026-10-28', 3),
+(104, '2026-11-15', 1),
+(105, '2026-11-21', 2),
+(106, '2026-12-02', 3);
+-------------------------------------------------------------------------------
 
 INSERT INTO study_notes.order_items (
-    order_item_id,
     order_id,
-    product_id,
-    quantity
+    quantity,
+    order_item_id,
+    product_id
 )
 VALUES
 -- Order 101: Oliver
-(1, 101, 1, 2),
-(2, 101, 2, 1),
-(3, 101, 3, 3),
+(101, 2, 1, 1),
+(101, 1, 2, 2),
+(101, 3, 3, 3),
 
 -- Order 102: Charlotte
-(4, 102, 1, 1),
-(5, 102, 5, 1),
+(102, 1, 4, 1),
+(102, 1, 5, 5),
 
 -- Order 103: Harry (October)
-(6, 103, 3, 3),
+(103, 3, 6, 3),
 
 -- Order 104: Oliver
-(7, 104, 1, 1),
-(8, 104, 4, 1),
+(104, 1, 7, 1),
+(104, 1, 8, 4),
 
 -- Order 105: Charlotte
-(9, 105, 2, 2),
-(10, 105, 4, 1),
+(105, 2, 9, 2),
+(105, 1, 10, 4),
 
 -- Order 106: Harry (December)
-(11, 106, 5, 2);
+(106, 2, 11, 5);
+-------------------------------------------------------------------------------
+
+-- The four tables look like this:
+
+/*
+
+-- Customers
++-------------+---------------+---------------------+
+| customer_id | customer_name | email               |
+|-------------+---------------+---------------------|
+| 1           | Oliver        | oliver@gmail.com    |
+| 2           | Charlotte     | charlotte@gmail.com |
+| 3           | Harry         | harry@gmail.com     |
++-------------+---------------+---------------------+
+
+-- Products
++------------+---------------------+--------+
+| product_id | product_name        | price  |
+|------------+---------------------+--------|
+| 1          | Wireless Mouse      |  25.00 |
+| 2          | Mechanical Keyboard |  89.99 |
+| 3          | USB-C Hub           |  45.00 |
+| 4          | Laptop Stand        |  35.00 |
+| 5          | Webcam              |  59.99 |
+| 6          | Monitor             | 199.99 |
++------------+---------------------+--------+
+
+-- Orders
++----------+------------+-------------+
+| order_id | order_date | customer_id |
+|----------+------------+-------------|
+| 101      | 2026-11-02 | 1           |
+| 102      | 2026-11-08 | 2           |
+| 103      | 2026-10-28 | 3           |
+| 104      | 2026-11-15 | 1           |
+| 105      | 2026-11-21 | 2           |
+| 106      | 2026-12-02 | 3           |
++----------+------------+-------------+
+
+-- Order Items
++---------------+----------+----------+------------+
+| order_item_id | quantity | order_id | product_id |
+|---------------+----------+----------+------------|
+| 1             | 2        | 101      | 1          |
+| 2             | 1        | 101      | 2          |
+| 3             | 3        | 101      | 3          |
+| 4             | 1        | 102      | 1          |
+| 5             | 1        | 102      | 5          |
+| 6             | 3        | 103      | 3          |
+| 7             | 1        | 104      | 1          |
+| 8             | 1        | 104      | 4          |
+| 9             | 2        | 105      | 2          |
+| 10            | 1        | 105      | 4          |
+| 11            | 2        | 106      | 5          |
++---------------+----------+----------+------------+
+
+*/
+
+-------------------------------------------------------------------------------
+
+-- EXAMPLE: 1 =>
+
+SELECT
+    products.product_id,
+    products.product_name
+FROM study_notes.products
+    LEFT JOIN study_notes.order_items
+        ON products.product_id = order_items.product_id
+WHERE order_items.product_id IS NULL;
 -------------------------------------------------------------------------------
 
 /*
@@ -303,7 +382,7 @@ ORDER BY
 */
 -------------------------------------------------------------------------------
 
--- STEP 3: Remove the example tables
+-- SECTION: 4 => Cleanup
 
 DROP TABLE IF EXISTS study_notes.order_items;
 DROP TABLE IF EXISTS study_notes.orders;
