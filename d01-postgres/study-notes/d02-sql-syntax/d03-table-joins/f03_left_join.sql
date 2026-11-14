@@ -238,28 +238,6 @@ WHERE order_items.product_id IS NULL;
 -------------------------------------------------------------------------------
 
 /*
-    NOTE:
-
-    The example data contains several different situations:
-
-    1. Wireless Mouse: Ordered multiple times during November.
-
-    2. Mechanical Keyboard: Ordered more than once during November.
-
-    3. USB-C Hub: Ordered in October, but not during November.
-
-    4. Laptop Stand: Ordered twice during November.
-
-    5. Webcam: Ordered during November and December.
-
-    6. Monitor: Has never been ordered.
-
-    We want ALL six products to appear in our November report,
-    regardless of whether they have matching orders.
-*/
--------------------------------------------------------------------------------
-
-/*
     EXAMPLE: FINDING ALL PRODUCTS AND THEIR NOVEMBER ORDERS
 
     The online store wants a monthly sales report showing
