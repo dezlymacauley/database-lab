@@ -24,15 +24,17 @@
 */
 -------------------------------------------------------------------------------
 
--- STEP 1: Setting up the data
+-- STEP: 1 => Create the table
 
 -- Each row stores the details of a registered customer.
 CREATE TABLE study_notes.customers (
     customer_id INT PRIMARY KEY,
-    customer_name TEXT
+    customer_name TEXT,
+    email TEXT
 );
 
--- Each row stores the details of a product sold by the store.
+-- Each row stores the details of a product that can be 
+-- bought from the business.
 CREATE TABLE study_notes.products (
     product_id INT PRIMARY KEY,
     product_name TEXT,
@@ -40,55 +42,64 @@ CREATE TABLE study_notes.products (
 );
 
 -- Each row stores an order placed by a customer.
+-- Each order can be made up of a single item,
+-- or multiple items because it is possible for a customer to make one order
+-- that contains multiple product.
+
+-- This table shares a relationship with the `customer_id` column of the
+-- customers table because the business needs to be able to track which
+-- customer made the order.
 CREATE TABLE study_notes.orders (
     order_id INT PRIMARY KEY,
-    customer_id INT REFERENCES study_notes.customers(customer_id),
-    order_date DATE
+    order_date DATE,
+    customer_id INT REFERENCES study_notes.customers(customer_id)
 );
 
--- Each row stores an individual product included in an order.
+-- Each row stores the details of each individual product that was ordered.
+-- This table shares a relationship with:
+-- the `order_id` of the orders tables, so that the business can keep track
+-- of which order each item is part of.
+
+-- The table also shares a relationship with:
+-- the `product_id` column of te product table because the business needs
+-- to be able to track the which products customers are ordering the most,
+-- and which products need better marketing.
 CREATE TABLE study_notes.order_items (
     order_item_id INT PRIMARY KEY,
+    quantity INT,
     order_id INT REFERENCES study_notes.orders(order_id),
-    product_id INT REFERENCES study_notes.products(product_id),
-    quantity INT
+    product_id INT REFERENCES study_notes.products(product_id)
 );
 -------------------------------------------------------------------------------
 
+-- If I run this command: \dt study_notes.*
+-- This should be the output
+
 /*
-    NOTE: WHY DO WE HAVE FOUR TABLES?
 
-    A customer can place multiple orders.
++-------------+-------------+-------+----------------+
+| Schema      | Name        | Type  | Owner          |
+|-------------+-------------+-------+----------------|
+| study_notes | customers   | table | dezly_macauley |
+| study_notes | order_items | table | dezly_macauley |
+| study_notes | orders      | table | dezly_macauley |
+| study_notes | products    | table | dezly_macauley |
++-------------+-------------+-------+----------------+
 
-    An order can contain multiple products.
-
-    A product can appear in multiple orders.
-
-    The `order_items` table connects individual products
-    to the orders they belong to.
-
-    For example, one order might contain:
-    - 2 Wireless Mice
-    - 1 Mechanical Keyboard
-    - 3 USB-C Hubs
-
-    Each of these products gets its own row in `order_items`.
-
-    This allows an order to contain multiple products without
-    repeating the order's details for every product.
 */
 -------------------------------------------------------------------------------
 
--- STEP 2: Insert example data
+-- STEP: 2 => Add the data for each table
 
 INSERT INTO study_notes.customers (
     customer_id,
-    customer_name
+    customer_name,
+    email
 )
 VALUES
-(1, 'Oliver'),
-(2, 'Charlotte'),
-(3, 'Harry');
+(1, 'Oliver', 'oliver@gmail.com'),
+(2, 'Charlotte', 'charlotte@gmail.com'),
+(3, 'Harry', 'harry@gmail.com');
 
 INSERT INTO study_notes.products (
     product_id,
